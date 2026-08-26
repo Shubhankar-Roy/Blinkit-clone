@@ -1,0 +1,198 @@
+{% extends 'admin_custom/base_admin.html' %}
+
+{% block title %}Pincode & Routing Simulator - Blinkit Admin{% endblock %}
+{% block page_heading %}Pincode Routing & Serviceability Simulator{% endblock %}
+
+{% block page_badge %}
+<span class="bg-indigo-100 text-indigo-800 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
+    Logistics Simulation Engine
+</span>
+{% endblock %}
+
+{% block admin_content %}
+<div class="space-y-6 max-w-5xl mx-auto">
+
+    <!-- Interactive Simulator Testing Card -->
+    <div class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-200 shadow-sm space-y-6">
+        
+        <div class="border-b border-gray-100 pb-4">
+            <h2 class="text-xl font-black text-gray-900 tracking-tight flex items-center gap-2">
+                <i class="fa-solid fa-route text-emerald-600"></i>
+                <span>Simulate Customer Order Routing</span>
+            </h2>
+            <p class="text-xs text-gray-500 font-medium mt-1">Enter any 6-digit Indian pincode to evaluate location serviceability, assigned Dark Store hub, and estimated delivery turnaround.</p>
+        </div>
+
+        <!-- Testing Input Form -->
+        <form method="GET" class="space-y-4">
+            <div>
+                <label class="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2">
+                    Enter Pincode for Simulation
+                </label>
+                <div class="flex flex-col sm:flex-row items-center gap-3">
+                    <div class="relative flex-1 w-full">
+                        <i class="fa-solid fa-map-pin absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="text" 
+                               name="pincode" 
+                               value="{{ test_pincode }}" 
+                               maxlength="6"
+                               placeholder="e.g. 560034, 560038, 560102, 110001" 
+                               required
+                               class="w-full bg-[#F4F6FB] text-base font-black rounded-2xl pl-11 pr-4 py-3.5 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition">
+                    </div>
+                    <button type="submit" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm px-8 py-3.5 rounded-2xl shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2 shrink-0">
+                        <i class="fa-solid fa-bolt"></i>
+                        <span>Run Routing Test</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quick Presets -->
+            <div class="flex flex-wrap items-center gap-2 pt-1">
+                <span class="text-[11px] font-bold text-gray-400">Quick Test:</span>
+                <a href="?pincode=560034" class="text-[11px] font-bold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 px-2.5 py-1 rounded-lg transition">560034 (Koramangala)</a>
+                <a href="?pincode=560038" class="text-[11px] font-bold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 px-2.5 py-1 rounded-lg transition">560038 (Indiranagar)</a>
+                <a href="?pincode=560102" class="text-[11px] font-bold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 px-2.5 py-1 rounded-lg transition">560102 (HSR Layout)</a>
+                <a href="?pincode=560066" class="text-[11px] font-bold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 px-2.5 py-1 rounded-lg transition">560066 (Whitefield)</a>
+                <a href="?pincode=110001" class="text-[11px] font-bold bg-red-50 text-red-700 hover:bg-red-100 px-2.5 py-1 rounded-lg transition">110001 (Unserved Area)</a>
+            </div>
+        </form>
+
+        <!-- Simulation Result View -->
+        {% if test_pincode %}
+            {% if matched_store %}
+            <!-- SUCCESS RESULT -->
+            <div class="bg-gradient-to-br from-emerald-50 via-teal-50 to-emerald-100/60 rounded-3xl p-6 border-2 border-emerald-500 shadow-md space-y-4">
+                
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-emerald-200 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-black text-xl shadow-lg shadow-emerald-600/30">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                        <div>
+                            <div class="text-[10px] font-black uppercase tracking-widest text-emerald-800">Routing Match Found</div>
+                            <h3 class="text-xl font-black text-gray-900">Pincode {{ test_pincode }} is 100% Serviceable!</h3>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-emerald-700 text-white font-black px-4 py-2 rounded-2xl text-xs flex items-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-bolt text-yellow-300"></i>
+                        <span>ETA: {{ matched_store.avg_delivery_mins }} MINS Instant Delivery</span>
+                    </div>
+                </div>
+
+                <!-- Assigned Store Specs -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                    
+                    <div class="bg-white/80 backdrop-blur rounded-2xl p-4 border border-emerald-200">
+                        <div class="text-gray-400 font-bold uppercase text-[10px]">Assigned Fulfillment Hub</div>
+                        <div class="font-extrabold text-gray-900 text-sm mt-1">{{ matched_store.name }}</div>
+                        <div class="text-gray-500 font-mono text-[11px] mt-0.5">{{ matched_store.code }} • {{ matched_store.city }}</div>
+                    </div>
+
+                    <div class="bg-white/80 backdrop-blur rounded-2xl p-4 border border-emerald-200">
+                        <div class="text-gray-400 font-bold uppercase text-[10px]">Physical Facility Location</div>
+                        <div class="font-bold text-gray-800 text-xs mt-1">{{ matched_store.address }}</div>
+                        <div class="text-emerald-700 font-bold text-[10px] mt-1">GPS: {{ matched_store.latitude }}, {{ matched_store.longitude }}</div>
+                    </div>
+
+                    <div class="bg-white/80 backdrop-blur rounded-2xl p-4 border border-emerald-200">
+                        <div class="text-gray-400 font-bold uppercase text-[10px]">Hub Operations Contact</div>
+                        <div class="font-bold text-gray-900 text-xs mt-1">{{ matched_store.manager_name|default:'Store Supervisor' }}</div>
+                        <div class="text-gray-500 text-[11px] mt-0.5">{{ matched_store.contact_phone }}</div>
+                    </div>
+
+                </div>
+
+                <!-- Action Button to Manage Inventory -->
+                <div class="pt-2 flex items-center justify-end gap-3">
+                    <a href="{% url 'darkstore_admin:inventory' store_id=matched_store.id %}" 
+                       class="bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs px-5 py-2.5 rounded-xl transition flex items-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-boxes-stacked"></i>
+                        <span>Inspect Store Inventory ({{ matched_store.total_inventory_items }} SKUs)</span>
+                    </a>
+                </div>
+
+            </div>
+
+            {% else %}
+            <!-- UNSERVICEABLE RESULT & 1-CLICK ASSIGN TOOL -->
+            <div class="bg-amber-50 rounded-3xl p-6 border-2 border-amber-300 shadow-sm space-y-5">
+                
+                <div class="flex items-start gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-black text-xl shadow-lg shadow-amber-500/20 shrink-0">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <div>
+                        <div class="text-[10px] font-black uppercase tracking-widest text-amber-800">Unserviceable Area Alert</div>
+                        <h3 class="text-lg font-black text-gray-900">Pincode {{ test_pincode }} is currently outside our 10-minute network.</h3>
+                        <p class="text-xs text-gray-600 mt-1">No active Dark Store has registered {{ test_pincode }} in its serviceable pincodes list.</p>
+                    </div>
+                </div>
+
+                <!-- 1-Click Assignment Box -->
+                <div class="bg-white rounded-2xl p-5 border border-amber-200 space-y-3">
+                    <div class="text-xs font-black text-gray-900 uppercase tracking-wider">
+                        1-Click Coverage Expansion: Assign Pincode {{ test_pincode }}
+                    </div>
+                    <form action="{% url 'darkstore_admin:assign_pincode' %}" method="POST" class="flex flex-col sm:flex-row items-center gap-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="pincode" value="{{ test_pincode }}">
+                        
+                        <div class="relative w-full sm:w-auto flex-1">
+                            <select name="store_id" required class="w-full bg-[#F4F6FB] text-xs font-bold text-gray-800 rounded-xl px-4 py-3 border border-gray-200 focus:border-emerald-500 focus:outline-none">
+                                <option value="" disabled selected>Select Dark Store to cover {{ test_pincode }}...</option>
+                                {% for st in all_stores %}
+                                <option value="{{ st.id }}">{{ st.name }} ({{ st.code }}) - {{ st.city }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <button type="submit" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-6 py-3 rounded-xl transition shrink-0 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Add Pincode to Store</span>
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+            {% endif %}
+        {% endif %}
+
+    </div>
+
+    <!-- Network Serviceability Coverage Reference Table -->
+    <div class="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 space-y-4">
+        <div>
+            <h3 class="text-base font-black text-gray-900 tracking-tight">Active Network Coverage Matrix</h3>
+            <p class="text-xs text-gray-500 font-medium">Overview of all active Dark Stores and their assigned delivery pincodes.</p>
+        </div>
+
+        <div class="divide-y divide-gray-100 text-xs">
+            {% for store in all_stores %}
+            <div class="py-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <span class="font-extrabold text-gray-900">{{ store.name }}</span>
+                        <span class="bg-slate-100 text-slate-800 font-mono text-[10px] font-bold px-1.5 py-0.5 rounded">{{ store.code }}</span>
+                        <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">ETA: {{ store.avg_delivery_mins }} mins</span>
+                    </div>
+                    <div class="flex flex-wrap gap-1 mt-1">
+                        {% for pin in store.pincode_list %}
+                        <a href="?pincode={{ pin }}" class="bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-emerald-800 font-mono text-[10px] font-bold px-1.5 py-0.5 rounded transition">
+                            {{ pin }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                <a href="{% url 'darkstore_admin:inventory' store_id=store.id %}" class="text-emerald-700 hover:text-emerald-800 font-bold text-xs shrink-0 flex items-center gap-1">
+                    <span>Manage Stock</span>
+                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

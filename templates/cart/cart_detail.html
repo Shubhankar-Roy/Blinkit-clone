@@ -1,0 +1,407 @@
+{% extends 'base.html' %}
+
+{% block title %}My Cart - Blinkit Clone{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8">
+    
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-2 text-xs text-gray-400 font-bold uppercase tracking-wider mb-6">
+        <a href="{% url 'products:home' %}" class="hover:text-blinkit-green">Home</a>
+        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        <span class="text-gray-900">Shopping Cart</span>
+    </div>
+
+    {% if cart and cart.items.exists %}
+    
+    <!-- Out of stock warning banner if any item became out of stock -->
+    {% if has_out_of_stock_items %}
+    <div class="bg-red-50 border-2 border-red-300 rounded-3xl p-5 mb-6 text-red-900 flex items-center justify-between gap-4 shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-red-600 text-white flex items-center justify-center font-black shrink-0">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <h3 class="text-sm font-black">Some items in your cart are currently out of stock</h3>
+                <p class="text-xs text-red-700 mt-0.5">Please remove unavailable items to proceed with instant 10-minute delivery.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Left: Cart Items Table / List -->
+        <div class="lg:col-span-8 space-y-4">
+            
+            <!-- Delivery Info Header Card -->
+            <div class="bg-white rounded-3xl border border-gray-200 p-5 shadow-sm flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-blinkit-green flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-black text-gray-900">Delivery in {{ eta_mins|default:10 }} minutes</h2>
+                        <p class="text-xs text-gray-500 font-medium">Fulfillment from <strong>{{ dark_store.name|default:'Central Hub' }}</strong> to your doorstep</p>
+                    </div>
+                </div>
+
+                <form action="{% url 'cart:clear' %}" method="POST" onsubmit="return confirm('Are you sure you want to empty your cart?');">
+                    {% csrf_token %}
+                    <button type="submit" class="text-xs font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3.5 py-2 rounded-xl transition cursor-pointer">
+                        Clear Cart
+                    </button>
+                </form>
+            </div>
+
+            <!-- Free Delivery Tracker -->
+            <div class="bg-white rounded-3xl border border-gray-200 p-5 shadow-sm space-y-2">
+                {% if cart.items_subtotal >= 199 %}
+                <div class="flex items-center gap-2 text-xs font-bold text-emerald-700">
+                    <i class="fa-solid fa-circle-check text-blinkit-green text-base"></i>
+                    <span>Yay! You unlocked <strong>FREE Delivery</strong> (Order above ₹199)</span>
+                </div>
+                {% else %}
+                <div class="flex items-center justify-between text-xs font-bold text-gray-700">
+                    <span>Add <strong>₹{{ cart.amount_needed_for_free_delivery|floatformat:0 }}</strong> more items to get <strong>FREE delivery</strong></span>
+                    <span class="text-[11px] text-gray-400 font-bold">₹199 threshold</span>
+                </div>
+                {% endif %}
+
+                <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                    <div class="bg-blinkit-green h-2.5 rounded-full transition-all duration-300" style="width: {{ cart.free_delivery_progress_percentage }}%;"></div>
+                </div>
+            </div>
+
+            <!-- Cart Items -->
+            <div class="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm divide-y divide-gray-100">
+                {% for item in cart_items %}
+                <div class="p-4 sm:p-5 flex items-center justify-between gap-4 {% if item.is_store_out_of_stock %}bg-red-50/40{% endif %}">
+                    <div class="flex items-center gap-4 min-w-0">
+                        <a href="{% url 'products:detail' item.product.id %}" class="w-16 h-16 rounded-2xl bg-gray-50 p-2 flex items-center justify-center border border-gray-100 shrink-0">
+                            <img src="{{ item.product.get_image }}" alt="{{ item.product.name }}" class="max-h-full max-w-full object-contain">
+                        </a>
+                        <div class="min-w-0">
+                            <a href="{% url 'products:detail' item.product.id %}" class="text-sm font-bold text-gray-900 hover:text-blinkit-green transition block truncate">
+                                {{ item.product.name }}
+                            </a>
+                            <div class="text-xs text-gray-500 font-medium">{{ item.product.unit_quantity }}</div>
+                            <div class="flex items-baseline gap-2 mt-1">
+                                <span class="text-sm font-black text-gray-900">₹{{ item.product.selling_price|floatformat:0 }}</span>
+                                {% if item.product.discount_percentage > 0 %}
+                                <span class="text-xs text-gray-400 line-through">₹{{ item.product.mrp|floatformat:0 }}</span>
+                                <span class="text-[10px] text-blue-600 font-bold bg-blue-50 px-1.5 py-0.2 rounded">{{ item.product.discount_percentage }}% OFF</span>
+                                {% endif %}
+                            </div>
+
+                            {% if item.is_store_out_of_stock %}
+                            <div class="mt-1">
+                                <span class="bg-red-100 text-red-800 text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider">
+                                    ⚠️ Out of stock at {{ dark_store.name|default:'store' }}
+                                </span>
+                            </div>
+                            {% elif item.stock_warning %}
+                            <div class="mt-1">
+                                <span class="text-amber-700 text-[10px] font-bold">
+                                    ⚠️ {{ item.stock_warning }}
+                                </span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Quantity Controls -->
+                    <div class="flex items-center gap-3 shrink-0">
+                        {% if not item.is_store_out_of_stock %}
+                        <div class="flex items-center bg-blinkit-green text-white font-bold rounded-xl overflow-hidden shadow-sm">
+                            <form action="{% url 'cart:update' %}" method="POST" class="inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                                <input type="hidden" name="action" value="remove">
+                                <button type="submit" class="px-3 py-1.5 hover:bg-blinkit-darkgreen text-xs font-black transition cursor-pointer">-</button>
+                            </form>
+                            <span class="px-3 py-1 text-xs font-extrabold">{{ item.quantity }}</span>
+                            <form action="{% url 'cart:update' %}" method="POST" class="inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                                <input type="hidden" name="action" value="add">
+                                <button type="submit" class="px-3 py-1.5 hover:bg-blinkit-darkgreen text-xs font-black transition cursor-pointer">+</button>
+                            </form>
+                        </div>
+                        {% else %}
+                        <!-- Remove button for out of stock item -->
+                        <form action="{% url 'cart:update' %}" method="POST" class="inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                            <input type="hidden" name="action" value="delete">
+                            <button type="submit" class="bg-red-100 hover:bg-red-200 text-red-700 text-xs font-extrabold px-3 py-1.5 rounded-xl transition cursor-pointer">
+                                Remove
+                            </button>
+                        </form>
+                        {% endif %}
+
+                        <div class="text-right min-w-[70px]">
+                            <div class="text-sm font-black text-gray-900">₹{{ item.subtotal|floatformat:0 }}</div>
+                            {% if item.item_savings > 0 %}
+                            <div class="text-[10px] text-emerald-600 font-bold">Saved ₹{{ item.item_savings|floatformat:0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Coupons & Offers Card -->
+            <div class="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-black text-gray-900 uppercase tracking-wider text-xs flex items-center gap-2">
+                        <i class="fa-solid fa-tags text-emerald-600"></i>
+                        <span>Coupons & Offers</span>
+                    </h3>
+                </div>
+
+                {% if cart.coupon %}
+                <!-- Applied Coupon Tag -->
+                <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black">
+                            <i class="fa-solid fa-tag text-base"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm font-black text-emerald-900">Coupon '{{ cart.coupon.code }}' Applied!</div>
+                            <div class="text-xs text-emerald-700 font-medium">{{ cart.coupon.description }}</div>
+                        </div>
+                    </div>
+                    <form action="{% url 'promotions:remove_coupon' %}" method="POST" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="text-xs font-bold text-red-600 hover:text-red-800 bg-red-100/70 hover:bg-red-100 px-3 py-1.5 rounded-xl transition cursor-pointer">
+                            Remove
+                        </button>
+                    </form>
+                </div>
+                {% else %}
+                <!-- Coupon Input Form -->
+                <form action="{% url 'promotions:apply_coupon' %}" method="POST" class="flex items-center gap-3">
+                    {% csrf_token %}
+                    <div class="relative flex-1">
+                        <i class="fa-solid fa-ticket absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                        <input type="text" 
+                               name="code" 
+                               placeholder="Enter Promo Code (e.g. WELCOME50)" 
+                               required
+                               class="w-full bg-[#F4F6FB] text-xs font-bold uppercase rounded-2xl pl-9 pr-3 py-3 border border-gray-200 focus:border-emerald-500 focus:outline-none">
+                    </div>
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-5 py-3 rounded-2xl transition shadow-md shadow-emerald-600/20 cursor-pointer">
+                        Apply
+                    </button>
+                </form>
+
+                <!-- Available Coupons Preset Chips -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <form action="{% url 'promotions:apply_coupon' %}" method="POST" class="w-full">
+                        {% csrf_token %}
+                        <input type="hidden" name="code" value="WELCOME50">
+                        <button type="submit" class="w-full text-left p-3 rounded-2xl border border-dashed border-emerald-300 bg-emerald-50/40 hover:bg-emerald-50 transition group flex items-center justify-between">
+                            <div>
+                                <div class="font-mono text-xs font-black text-emerald-800">WELCOME50</div>
+                                <div class="text-[11px] text-gray-500">Flat ₹50 OFF on orders above ₹199</div>
+                            </div>
+                            <span class="text-xs font-extrabold text-emerald-700 group-hover:underline">APPLY</span>
+                        </button>
+                    </form>
+
+                    <form action="{% url 'promotions:apply_coupon' %}" method="POST" class="w-full">
+                        {% csrf_token %}
+                        <input type="hidden" name="code" value="BLINKIT20">
+                        <button type="submit" class="w-full text-left p-3 rounded-2xl border border-dashed border-blue-300 bg-blue-50/40 hover:bg-blue-50 transition group flex items-center justify-between">
+                            <div>
+                                <div class="font-mono text-xs font-black text-blue-800">BLINKIT20</div>
+                                <div class="text-[11px] text-gray-500">20% OFF (Up to ₹100 discount)</div>
+                            </div>
+                            <span class="text-xs font-extrabold text-blue-700 group-hover:underline">APPLY</span>
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Delivery Partner Tip -->
+            <div class="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm space-y-3">
+                <div class="flex items-center justify-between text-xs font-black text-gray-900">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-heart text-rose-500 text-sm"></i>
+                        <span>Tip your delivery partner</span>
+                    </div>
+                    {% if cart.tip_amount > 0 %}
+                    <span class="text-emerald-700 font-extrabold bg-emerald-50 px-2.5 py-0.5 rounded-full">₹{{ cart.tip_amount|floatformat:0 }} Added</span>
+                    {% endif %}
+                </div>
+                <p class="text-xs text-gray-500">100% of the tip goes directly to your delivery partner who brings your order in 10 minutes.</p>
+
+                <div class="grid grid-cols-4 gap-2 pt-1">
+                    <form action="{% url 'cart:set_tip' %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="tip" value="10">
+                        <button type="submit" class="w-full py-2.5 rounded-2xl text-xs font-black transition {% if cart.tip_amount == 10 %}bg-emerald-600 text-white shadow-sm{% else %}bg-[#F4F6FB] text-gray-700 hover:bg-emerald-50{% endif %}">
+                            ₹10
+                        </button>
+                    </form>
+                    <form action="{% url 'cart:set_tip' %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="tip" value="20">
+                        <button type="submit" class="w-full py-2.5 rounded-2xl text-xs font-black transition {% if cart.tip_amount == 20 %}bg-emerald-600 text-white shadow-sm{% else %}bg-[#F4F6FB] text-gray-700 hover:bg-emerald-50{% endif %}">
+                            ₹20
+                        </button>
+                    </form>
+                    <form action="{% url 'cart:set_tip' %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="tip" value="30">
+                        <button type="submit" class="w-full py-2.5 rounded-2xl text-xs font-black transition {% if cart.tip_amount == 30 %}bg-emerald-600 text-white shadow-sm{% else %}bg-[#F4F6FB] text-gray-700 hover:bg-emerald-50{% endif %}">
+                            ₹30
+                        </button>
+                    </form>
+                    <form action="{% url 'cart:set_tip' %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="tip" value="0">
+                        <button type="submit" class="w-full py-2.5 rounded-2xl text-xs font-bold text-gray-400 hover:text-red-600 bg-[#F4F6FB] hover:bg-red-50 transition">
+                            Clear
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Back to Shopping Link -->
+            <div class="pt-2">
+                <a href="{% url 'products:home' %}" class="inline-flex items-center gap-2 text-xs font-bold text-blinkit-green hover:underline">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Continue shopping & add more items</span>
+                </a>
+            </div>
+
+        </div>
+
+        <!-- Right: Bill Summary & Checkout Box -->
+        <div class="lg:col-span-4 space-y-4">
+            
+            <!-- Bill Card -->
+            <div class="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm space-y-4">
+                <h3 class="font-black text-gray-900 uppercase tracking-wider text-xs">Bill Details</h3>
+                
+                <div class="space-y-2.5 text-xs">
+                    <div class="flex justify-between text-gray-600">
+                        <span>Items Subtotal ({{ cart.item_count }} item{{ cart.item_count|pluralize }})</span>
+                        <span class="font-bold text-gray-900">₹{{ cart.items_subtotal|floatformat:0 }}</span>
+                    </div>
+
+                    <div class="flex justify-between text-gray-600">
+                        <span class="flex items-center gap-1">
+                            Delivery Fee
+                            {% if cart.delivery_fee == 0 %}
+                            <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded">FREE</span>
+                            {% endif %}
+                        </span>
+                        <span class="font-bold {% if cart.delivery_fee == 0 %}text-emerald-600 line-through{% else %}text-gray-900{% endif %}">
+                            {% if cart.delivery_fee == 0 %}₹25{% else %}₹{{ cart.delivery_fee|floatformat:0 }}{% endif %}
+                        </span>
+                    </div>
+
+                    <div class="flex justify-between text-gray-600">
+                        <span>Handling Fee</span>
+                        <span class="font-bold text-gray-900">₹{{ cart.handling_fee|floatformat:0 }}</span>
+                    </div>
+
+                    {% if cart.coupon_discount > 0 %}
+                    <div class="flex justify-between text-emerald-700 font-black">
+                        <span class="flex items-center gap-1">
+                            <i class="fa-solid fa-tag text-[10px]"></i>
+                            <span>Coupon Discount ({{ cart.coupon.code }})</span>
+                        </span>
+                        <span>- ₹{{ cart.coupon_discount|floatformat:0 }}</span>
+                    </div>
+                    {% endif %}
+
+                    {% if cart.tip_amount > 0 %}
+                    <div class="flex justify-between text-gray-700 font-bold">
+                        <span>Delivery Partner Tip</span>
+                        <span>+ ₹{{ cart.tip_amount|floatformat:0 }}</span>
+                    </div>
+                    {% endif %}
+
+                    {% if cart.total_savings > 0 %}
+                    <div class="flex justify-between text-emerald-600 font-bold pt-2 border-t border-dashed border-gray-200">
+                        <span>Your Total Savings</span>
+                        <span>- ₹{{ cart.total_savings|floatformat:0 }}</span>
+                    </div>
+                    {% endif %}
+
+                    <div class="flex justify-between items-center text-base font-black text-gray-900 pt-3 border-t border-gray-200">
+                        <span>To Pay</span>
+                        <span class="text-xl text-gray-900 font-black">₹{{ cart.grand_total|floatformat:0 }}</span>
+                    </div>
+                </div>
+
+                <!-- Delivery Address Box -->
+                <div class="p-4 bg-[#F4F6FB] rounded-2xl border border-gray-100 space-y-1">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-black text-gray-800">Delivering to</span>
+                        {% if request.user.is_authenticated %}
+                        <a href="{% url 'accounts:profile' %}" class="text-blinkit-green font-bold hover:underline">Manage Address</a>
+                        {% endif %}
+                    </div>
+                    {% if request.user.is_authenticated and request.user.addresses.exists %}
+                    <p class="text-xs text-gray-600 font-medium truncate">{{ request.user.addresses.first }}</p>
+                    {% else %}
+                    <p class="text-xs text-gray-600 font-medium truncate">{{ current_location_name|default:'Koramangala, Bengaluru' }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Checkout CTA -->
+                {% if has_out_of_stock_items %}
+                <button disabled class="w-full bg-gray-300 text-gray-500 font-black py-4 rounded-2xl cursor-not-allowed text-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-ban"></i>
+                    <span>Remove Out-of-Stock Items to Checkout</span>
+                </button>
+                {% elif request.user.is_authenticated %}
+                <a href="{% url 'orders:checkout' %}" class="w-full bg-blinkit-green hover:bg-blinkit-darkgreen text-white font-black py-4 rounded-2xl transition shadow-lg hover:shadow-xl text-sm flex items-center justify-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    <span>Proceed to Checkout (₹{{ cart.grand_total|floatformat:0 }})</span>
+                </a>
+                {% else %}
+                <div class="space-y-2.5">
+                    <a href="{% url 'accounts:login' %}?next={% url 'cart:detail' %}" class="w-full bg-blinkit-green hover:bg-blinkit-darkgreen text-white font-black py-4 rounded-2xl transition shadow-lg hover:shadow-xl text-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-lock text-xs"></i>
+                        <span>Log In to Place Order</span>
+                    </a>
+                    <div class="text-center text-xs text-gray-500">
+                        New user? 
+                        <a href="{% url 'accounts:register' %}?next={% url 'cart:detail' %}" class="font-bold text-blinkit-green hover:underline">
+                            Create an Account
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% else %}
+    <!-- Empty Cart Page -->
+    <div class="bg-white rounded-3xl border border-gray-200 p-12 text-center max-w-lg mx-auto my-12 space-y-4 shadow-sm">
+        <div class="w-24 h-24 rounded-full bg-emerald-50 text-blinkit-green flex items-center justify-center text-4xl mx-auto shadow-inner">
+            <i class="fa-solid fa-basket-shopping"></i>
+        </div>
+        <div class="space-y-1">
+            <h2 class="text-2xl font-black text-gray-900">Your Cart is Empty</h2>
+            <p class="text-xs text-gray-500">Looks like you haven't added anything to your cart yet.</p>
+        </div>
+        <a href="{% url 'products:home' %}" class="inline-block bg-blinkit-green hover:bg-blinkit-darkgreen text-white text-xs font-extrabold px-8 py-3.5 rounded-2xl shadow-md hover:shadow-lg transition uppercase tracking-wider">
+            Start Shopping Now
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

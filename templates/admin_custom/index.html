@@ -1,0 +1,269 @@
+{% extends 'admin_custom/base_admin.html' %}
+
+{% block title %}Store Overview - Blinkit Admin{% endblock %}
+{% block page_heading %}Merchant Operations & Analytics Dashboard{% endblock %}
+
+{% block page_badge %}
+<span class="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1.5">
+    <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+    <span>Live Overview</span>
+</span>
+{% endblock %}
+
+{% block admin_content %}
+<div class="space-y-6">
+
+    <!-- KPI Metric Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <div class="bg-white rounded-3xl p-5 border border-gray-200 shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Revenue</span>
+                <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-black text-lg">
+                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div class="text-3xl font-black text-gray-900">₹{{ total_revenue|floatformat:0 }}</div>
+                <div class="text-xs font-bold text-emerald-700 mt-1 flex items-center gap-1">
+                    <i class="fa-solid fa-arrow-trend-up"></i>
+                    <span>Collected across all stores</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-3xl p-5 border border-gray-200 shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Orders</span>
+                <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center font-black text-lg">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div class="text-3xl font-black text-gray-900">{{ total_orders }}</div>
+                <div class="text-xs font-bold text-blue-700 mt-1 flex items-center gap-1">
+                    <span>{{ placed_orders|add:packing_orders|add:out_for_delivery_orders }} active in pipeline</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-3xl p-5 border border-gray-200 shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Catalog Products</span>
+                <div class="w-10 h-10 rounded-2xl bg-purple-50 text-purple-700 flex items-center justify-center font-black text-lg">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div class="text-3xl font-black text-gray-900">{{ total_products }}</div>
+                <div class="text-xs font-bold {% if out_of_stock_count > 0 %}text-red-600{% else %}text-emerald-700{% endif %} mt-1 flex items-center gap-1">
+                    {% if out_of_stock_count > 0 %}
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>{{ out_of_stock_count }} out-of-stock items</span>
+                    {% else %}
+                    <i class="fa-solid fa-check"></i>
+                    <span>All products available</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-3xl p-5 border border-gray-200 shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Fulfillment Fleet</span>
+                <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center font-black text-lg">
+                    <i class="fa-solid fa-warehouse"></i>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div class="text-3xl font-black text-gray-900">{{ active_darkstores }} Hubs</div>
+                <div class="text-xs font-bold text-amber-700 mt-1 flex items-center gap-1">
+                    <span>10-Minute instant coverage</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Live Order Pipeline Funnel -->
+    <div class="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm space-y-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <h3 class="text-base font-black text-gray-900 tracking-tight">Live Fulfillment Pipeline</h3>
+                <p class="text-xs text-gray-500">Real-time status of customer orders moving across dark store hubs.</p>
+            </div>
+            <a href="{% url 'orders_admin:list' %}" class="text-xs font-extrabold text-emerald-700 hover:underline flex items-center gap-1">
+                <span>View Full Queue</span>
+                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5 pt-1">
+            <a href="{% url 'orders_admin:list' %}?status=PLACED" class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 hover:bg-amber-100/70 transition space-y-1 block">
+                <div class="flex items-center justify-between text-amber-800">
+                    <span class="text-xs font-extrabold uppercase">1. Placed</span>
+                    <i class="fa-solid fa-receipt text-sm"></i>
+                </div>
+                <div class="text-2xl font-black text-amber-900">{{ placed_orders }}</div>
+                <div class="text-[10px] text-amber-700 font-medium">Awaiting picker</div>
+            </a>
+
+            <a href="{% url 'orders_admin:list' %}?status=PACKING" class="p-4 rounded-2xl bg-purple-50/70 border border-purple-200 hover:bg-purple-100/70 transition space-y-1 block">
+                <div class="flex items-center justify-between text-purple-800">
+                    <span class="text-xs font-extrabold uppercase">2. Packing</span>
+                    <i class="fa-solid fa-box-open text-sm"></i>
+                </div>
+                <div class="text-2xl font-black text-purple-900">{{ packing_orders }}</div>
+                <div class="text-[10px] text-purple-700 font-medium">In warehouse hub</div>
+            </a>
+
+            <a href="{% url 'orders_admin:list' %}?status=OUT_FOR_DELIVERY" class="p-4 rounded-2xl bg-blue-50/70 border border-blue-200 hover:bg-blue-100/70 transition space-y-1 block">
+                <div class="flex items-center justify-between text-blue-800">
+                    <span class="text-xs font-extrabold uppercase">3. Dispatched</span>
+                    <i class="fa-solid fa-motorcycle text-sm"></i>
+                </div>
+                <div class="text-2xl font-black text-blue-900">{{ out_for_delivery_orders }}</div>
+                <div class="text-[10px] text-blue-700 font-medium">Rider en route</div>
+            </a>
+
+            <a href="{% url 'orders_admin:list' %}?status=DELIVERED" class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 hover:bg-emerald-100/70 transition space-y-1 block">
+                <div class="flex items-center justify-between text-emerald-800">
+                    <span class="text-xs font-extrabold uppercase">4. Delivered</span>
+                    <i class="fa-solid fa-circle-check text-sm"></i>
+                </div>
+                <div class="text-2xl font-black text-emerald-900">{{ delivered_orders }}</div>
+                <div class="text-[10px] text-emerald-700 font-medium">Completed orders</div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Two Column Grid: Recent Orders & Catalog Highlights -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left: Recent Live Orders Table -->
+        <div class="lg:col-span-8 bg-white rounded-3xl border border-gray-200 p-6 shadow-sm space-y-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-base font-black text-gray-900 tracking-tight">Recent Orders</h3>
+                    <p class="text-xs text-gray-500">Live feed of incoming orders.</p>
+                </div>
+                <a href="{% url 'orders_admin:list' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-extrabold text-xs px-3.5 py-1.5 rounded-xl transition">
+                    View All
+                </a>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="bg-gray-50 text-gray-500 font-bold uppercase tracking-wider border-b border-gray-200">
+                            <th class="py-3 px-4">Order #</th>
+                            <th class="py-3 px-4">Customer</th>
+                            <th class="py-3 px-4">Amount</th>
+                            <th class="py-3 px-4">Status</th>
+                            <th class="py-3 px-4 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 font-medium">
+                        {% for order in recent_orders %}
+                        <tr class="hover:bg-gray-50/60 transition">
+                            <td class="py-3 px-4">
+                                <a href="{% url 'orders_admin:detail' order_number=order.order_number %}" class="font-mono font-black text-gray-900 hover:text-emerald-600">
+                                    #{{ order.order_number }}
+                                </a>
+                                <div class="text-[10px] text-gray-400">{{ order.created_at|date:"h:i A" }}</div>
+                            </td>
+                            <td class="py-3 px-4">
+                                <div class="font-extrabold text-gray-900">{{ order.user.display_name|default:order.phone }}</div>
+                                <div class="text-[10px] text-gray-400 truncate max-w-[140px]">{{ order.delivery_address }}</div>
+                            </td>
+                            <td class="py-3 px-4">
+                                <div class="font-black text-gray-900">₹{{ order.grand_total|floatformat:0 }}</div>
+                                <div class="text-[10px] text-gray-400">{{ order.payment_method }}</div>
+                            </td>
+                            <td class="py-3 px-4">
+                                <span class="text-[10px] font-black px-2 py-0.5 rounded uppercase {% if order.status == 'DELIVERED' %}bg-emerald-100 text-emerald-800{% elif order.status == 'CANCELLED' %}bg-red-100 text-red-800{% else %}bg-purple-100 text-purple-800{% endif %}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4 text-right">
+                                <a href="{% url 'orders_admin:detail' order_number=order.order_number %}" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold p-1.5 rounded-lg transition" title="Inspect Order">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="py-8 text-center text-gray-400">No recent orders.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Right: Fast Actions & Catalog Shortcuts -->
+        <div class="lg:col-span-4 space-y-6">
+            
+            <!-- Quick Action Hub -->
+            <div class="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm space-y-3">
+                <h3 class="text-xs font-black text-gray-900 uppercase tracking-wider">Quick Management</h3>
+                
+                <div class="space-y-2">
+                    <a href="{% url 'admin_dashboard:product_add' %}" class="w-full flex items-center justify-between p-3 rounded-2xl bg-emerald-50/50 hover:bg-emerald-50 border border-emerald-200/60 text-emerald-900 font-extrabold text-xs transition">
+                        <div class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-plus-circle text-emerald-600 text-sm"></i>
+                            <span>Add New Product</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-emerald-600"></i>
+                    </a>
+
+                    <a href="{% url 'promotions_admin:create' %}" class="w-full flex items-center justify-between p-3 rounded-2xl bg-purple-50/50 hover:bg-purple-50 border border-purple-200/60 text-purple-900 font-extrabold text-xs transition">
+                        <div class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-ticket text-purple-600 text-sm"></i>
+                            <span>Create Promo Coupon</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-purple-600"></i>
+                    </a>
+
+                    <a href="{% url 'darkstore_admin:simulator' %}" class="w-full flex items-center justify-between p-3 rounded-2xl bg-blue-50/50 hover:bg-blue-50 border border-blue-200/60 text-blue-900 font-extrabold text-xs transition">
+                        <div class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-route text-blue-600 text-sm"></i>
+                            <span>Pincode Routing Simulator</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-blue-600"></i>
+                    </a>
+
+                    <a href="{% url 'darkstore_admin:list' %}" class="w-full flex items-center justify-between p-3 rounded-2xl bg-amber-50/50 hover:bg-amber-50 border border-amber-200/60 text-amber-900 font-extrabold text-xs transition">
+                        <div class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-warehouse text-amber-600 text-sm"></i>
+                            <span>Manage Dark Store Fleet</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-amber-600"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Out of Stock Warnings -->
+            {% if out_of_stock_count > 0 %}
+            <div class="bg-red-50 border border-red-200 rounded-3xl p-5 text-red-900 space-y-2">
+                <div class="flex items-center gap-2 text-xs font-black">
+                    <i class="fa-solid fa-triangle-exclamation text-red-600"></i>
+                    <span>Warehouse Inventory Alert</span>
+                </div>
+                <p class="text-xs text-red-700 font-medium">
+                    There are <strong>{{ out_of_stock_count }} items</strong> marked as out of stock across the store.
+                </p>
+                <div class="pt-1">
+                    <a href="{% url 'admin_dashboard:products' %}?stock=OUT_OF_STOCK" class="inline-block bg-red-600 text-white font-extrabold text-xs px-3.5 py-1.5 rounded-xl hover:bg-red-700 transition">
+                        Inspect Out-of-Stock Items
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Blinkit - 10 Minute Grocery Delivery{% endblock %}</title>
+    
+    <!-- Google Fonts (Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        blinkit: {
+                            yellow: '#F8CB46',
+                            green: '#0C831F',
+                            darkgreen: '#056214',
+                            lightgreen: '#E8F5E9'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="bg-[#F4F6FB] text-gray-800 font-sans flex flex-col min-h-screen antialiased selection:bg-emerald-200 selection:text-emerald-900">
+
+    <!-- Top Navigation Header -->
+    {% include 'components/header.html' %}
+
+    <!-- Flash Messages / Toast Alerts -->
+    {% if messages %}
+    <div class="max-w-7xl mx-auto px-4 mt-4 w-full">
+        {% for message in messages %}
+        <div class="p-3.5 mb-2 rounded-xl text-sm font-semibold flex items-center gap-2 shadow-sm {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-emerald-50 text-emerald-800 border border-emerald-200{% endif %}">
+            {% if message.tags == 'error' %}
+            <i class="fa-solid fa-circle-exclamation text-red-500"></i>
+            {% else %}
+            <i class="fa-solid fa-circle-check text-emerald-600"></i>
+            {% endif %}
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content Body -->
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Slide-over Cart Drawer -->
+    {% include 'components/cart_drawer.html' %}
+
+    <!-- Location Selection Modal -->
+    {% include 'components/location_modal.html' %}
+
+    <!-- Blinkit Footer -->
+    {% include 'components/footer.html' %}
+
+</body>
+</html>

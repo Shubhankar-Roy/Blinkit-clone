@@ -1,0 +1,266 @@
+{% extends 'admin_custom/base_admin.html' %}
+
+{% block title %}Inventory Matrix: {{ store.name }} - Blinkit Admin{% endblock %}
+{% block page_heading %}Inventory Management: {{ store.name }}{% endblock %}
+
+{% block page_badge %}
+<span class="bg-slate-900 text-white font-mono text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
+    {{ store.code }}
+</span>
+{% endblock %}
+
+{% block admin_content %}
+<div class="space-y-6">
+
+    <!-- Store Summary Strip & Store Switcher -->
+    <div class="bg-white rounded-3xl p-6 border border-gray-200 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+        
+        <!-- Store Identity & Manager Details -->
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-black text-lg shadow-lg shadow-emerald-600/20 shrink-0">
+                <i class="fa-solid fa-boxes-stacked"></i>
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h2 class="text-lg font-black text-gray-900">{{ store.name }}</h2>
+                    <span class="text-[10px] font-black px-2 py-0.5 rounded-full uppercase {% if store.is_active %}bg-emerald-100 text-emerald-800{% else %}bg-red-100 text-red-700{% endif %}">
+                        {% if store.is_active %}Open{% else %}Closed{% endif %}
+                    </span>
+                </div>
+                <div class="text-xs text-gray-500 mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <span><i class="fa-solid fa-location-dot text-emerald-600 mr-1"></i>{{ store.address }}</span>
+                    <span><i class="fa-solid fa-user-tie text-emerald-600 mr-1"></i>{{ store.manager_name|default:'Manager' }} ({{ store.contact_phone }})</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Switch Store Dropdown -->
+        <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+            <div class="flex items-center gap-2 bg-[#F4F6FB] px-3 py-2 rounded-2xl border border-gray-200">
+                <span class="text-[11px] font-bold text-gray-500">Switch Store:</span>
+                <select onchange="window.location.href='/dashboard/darkstore/stores/' + this.value + '/inventory/'" 
+                        class="bg-transparent text-xs font-black text-gray-900 focus:outline-none cursor-pointer">
+                    {% for s in all_stores %}
+                    <option value="{{ s.id }}" {% if s.id == store.id %}selected{% endif %}>
+                        {{ s.name }} ({{ s.code }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Bulk Restock Form Button -->
+            <form action="{% url 'darkstore_admin:bulk_restock' store_id=store.id %}" method="POST" class="inline-block">
+                {% csrf_token %}
+                <input type="hidden" name="target" value="all_low">
+                <input type="hidden" name="quantity" value="50">
+                <button type="submit" 
+                        onclick="return confirm('Replenish all low stock items in {{ store.name }} to 50 units?')"
+                        class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shadow-sm shadow-emerald-600/20">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Restock Low (≤10) to 50</span>
+                </button>
+            </form>
+        </div>
+
+    </div>
+
+    <!-- Filters & Search Toolbar -->
+    <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+        
+        <!-- Search Form -->
+        <form method="GET" class="flex items-center gap-2 w-full md:w-80">
+            <div class="relative w-full">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                <input type="text" 
+                       name="q" 
+                       value="{{ query }}" 
+                       placeholder="Filter by product name..." 
+                       class="w-full bg-[#F4F6FB] text-xs font-semibold rounded-xl pl-9 pr-3 py-2.5 border border-transparent focus:border-emerald-500 focus:bg-white focus:outline-none transition">
+            </div>
+            {% if selected_category %}
+            <input type="hidden" name="category" value="{{ selected_category }}">
+            {% endif %}
+            {% if selected_status %}
+            <input type="hidden" name="stock_status" value="{{ selected_status }}">
+            {% endif %}
+            <button type="submit" class="bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold px-3 py-2.5 rounded-xl transition">
+                Filter
+            </button>
+        </form>
+
+        <!-- Category & Stock Status Filters -->
+        <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+            
+            <!-- Category Filter -->
+            <select onchange="location = this.value;" class="bg-[#F4F6FB] text-xs font-bold text-gray-700 px-3 py-2 rounded-xl border border-gray-200 focus:outline-none">
+                <option value="?{% if selected_status %}stock_status={{ selected_status }}&{% endif %}{% if query %}q={{ query }}{% endif %}">
+                    All Categories
+                </option>
+                {% for cat in categories %}
+                <option value="?category={{ cat.id }}{% if selected_status %}&stock_status={{ selected_status }}{% endif %}{% if query %}&q={{ query }}{% endif %}" 
+                        {% if selected_category == cat.id %}selected{% endif %}>
+                    {{ cat.name }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <!-- Status Pills -->
+            <div class="flex items-center gap-1.5">
+                <a href="?{% if selected_category %}category={{ selected_category }}&{% endif %}{% if query %}q={{ query }}{% endif %}" 
+                   class="px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold transition {% if not selected_status %}bg-slate-900 text-white{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
+                    All ({{ store.total_inventory_items }})
+                </a>
+                <a href="?stock_status=in_stock{% if selected_category %}&category={{ selected_category }}{% endif %}{% if query %}&q={{ query }}{% endif %}" 
+                   class="px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold transition {% if selected_status == 'in_stock' %}bg-emerald-600 text-white{% else %}bg-emerald-50 text-emerald-800 hover:bg-emerald-100{% endif %}">
+                    In Stock ({{ store.in_stock_count }})
+                </a>
+                <a href="?stock_status=low_stock{% if selected_category %}&category={{ selected_category }}{% endif %}{% if query %}&q={{ query }}{% endif %}" 
+                   class="px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold transition {% if selected_status == 'low_stock' %}bg-amber-500 text-white{% else %}bg-amber-50 text-amber-800 hover:bg-amber-100{% endif %}">
+                    Low Stock ({{ store.low_stock_count }})
+                </a>
+                <a href="?stock_status=out_of_stock{% if selected_category %}&category={{ selected_category }}{% endif %}{% if query %}&q={{ query }}{% endif %}" 
+                   class="px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold transition {% if selected_status == 'out_of_stock' %}bg-red-600 text-white{% else %}bg-red-50 text-red-700 hover:bg-red-100{% endif %}">
+                    OOS ({{ store.out_of_stock_count }})
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Inventory Data Table -->
+    <div class="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead>
+                    <tr class="bg-gray-50 text-gray-500 font-bold uppercase tracking-wider border-b border-gray-200">
+                        <th class="py-4 px-6">Product SKU</th>
+                        <th class="py-4 px-6">Category</th>
+                        <th class="py-4 px-6">Selling Price</th>
+                        <th class="py-4 px-6 text-center">Live Stock Adjuster</th>
+                        <th class="py-4 px-6 text-center">Health Status</th>
+                        <th class="py-4 px-6 text-center">Store Availability</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 font-medium">
+                    {% for inv in inventories %}
+                    <tr class="hover:bg-emerald-50/30 transition">
+                        
+                        <!-- Product Item Thumbnail & Info -->
+                        <td class="py-4 px-6">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-xl bg-gray-50 border border-gray-200 p-1 flex items-center justify-center shrink-0">
+                                    <img src="{{ inv.product.get_image }}" alt="{{ inv.product.name }}" class="max-h-full max-w-full object-contain">
+                                </div>
+                                <div>
+                                    <div class="font-extrabold text-gray-900 text-xs line-clamp-1">{{ inv.product.name }}</div>
+                                    <div class="text-gray-400 text-[11px] font-medium">{{ inv.product.unit_quantity }}</div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Category -->
+                        <td class="py-4 px-6">
+                            <span class="bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded text-[10px]">
+                                {{ inv.product.category.name }}
+                            </span>
+                        </td>
+
+                        <!-- Price -->
+                        <td class="py-4 px-6">
+                            <div class="font-black text-gray-900 text-xs">₹{{ inv.product.selling_price|floatformat:0 }}</div>
+                            {% if inv.product.discount_percentage > 0 %}
+                            <div class="text-[10px] text-gray-400 line-through">₹{{ inv.product.mrp|floatformat:0 }}</div>
+                            {% endif %}
+                        </td>
+
+                        <!-- Live Stock Adjuster (+ / - buttons and direct input) -->
+                        <td class="py-4 px-6 text-center">
+                            <div class="inline-flex items-center gap-1.5 bg-[#F4F6FB] p-1 rounded-xl border border-gray-200">
+                                
+                                <!-- Decrement Form -->
+                                <form action="{% url 'darkstore_admin:stock_update' inventory_id=inv.id %}" method="POST" class="inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="decrement">
+                                    <input type="hidden" name="delta" value="1">
+                                    <button type="submit" 
+                                            class="w-7 h-7 rounded-lg bg-white hover:bg-red-50 hover:text-red-600 text-gray-700 font-black shadow-xs transition flex items-center justify-center text-xs">
+                                        -
+                                    </button>
+                                </form>
+
+                                <!-- Direct Quantity Form -->
+                                <form action="{% url 'darkstore_admin:stock_update' inventory_id=inv.id %}" method="POST" class="inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="set">
+                                    <input type="number" 
+                                           name="quantity" 
+                                           value="{{ inv.stock_quantity }}" 
+                                           min="0"
+                                           onchange="this.form.submit()" 
+                                           class="w-14 text-center bg-white font-black text-xs rounded-lg py-1 border border-gray-200 focus:border-emerald-500 focus:outline-none">
+                                </form>
+
+                                <!-- Increment Form -->
+                                <form action="{% url 'darkstore_admin:stock_update' inventory_id=inv.id %}" method="POST" class="inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="increment">
+                                    <input type="hidden" name="delta" value="5">
+                                    <button type="submit" 
+                                            title="Add 5 units"
+                                            class="w-7 h-7 rounded-lg bg-white hover:bg-emerald-50 hover:text-emerald-700 text-gray-700 font-black shadow-xs transition flex items-center justify-center text-xs">
+                                        +5
+                                    </button>
+                                </form>
+
+                            </div>
+                        </td>
+
+                        <!-- Health Status Badge -->
+                        <td class="py-4 px-6 text-center">
+                            {% if inv.is_out_of_stock %}
+                            <span class="inline-flex items-center gap-1 bg-red-50 text-red-700 font-black px-2.5 py-1 rounded-full text-[10px] uppercase">
+                                <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                                Out of Stock
+                            </span>
+                            {% elif inv.is_low_stock %}
+                            <span class="inline-flex items-center gap-1 bg-amber-50 text-amber-800 font-black px-2.5 py-1 rounded-full text-[10px] uppercase">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                Low (≤10)
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-800 font-black px-2.5 py-1 rounded-full text-[10px] uppercase">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                                Healthy
+                            </span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Store Availability Switch -->
+                        <td class="py-4 px-6 text-center">
+                            <form action="{% url 'darkstore_admin:stock_update' inventory_id=inv.id %}" method="POST" class="inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="toggle_availability">
+                                <button type="submit" 
+                                        class="text-[10px] font-black px-3 py-1.5 rounded-xl transition {% if inv.is_available %}bg-emerald-100 hover:bg-emerald-200 text-emerald-900{% else %}bg-gray-200 hover:bg-gray-300 text-gray-700{% endif %}">
+                                    {% if inv.is_available %}✓ Available{% else %}✗ Disabled{% endif %}
+                                </button>
+                            </form>
+                        </td>
+
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="py-12 text-center text-gray-400">
+                            <div class="text-sm font-bold text-gray-700">No products found for the selected filter.</div>
+                            <div class="text-xs text-gray-400 mt-1">Try resetting your search query or category selection.</div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

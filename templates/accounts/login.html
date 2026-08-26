@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Blinkit{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto px-4 py-12">
+    
+    <div class="bg-white rounded-3xl border border-gray-200 p-8 shadow-sm space-y-6">
+        
+        <!-- Header -->
+        <div class="text-center space-y-2">
+            <span class="text-4xl font-black tracking-tight text-blinkit-yellow">blink<span class="text-blinkit-green">it</span></span>
+            <h1 class="text-2xl font-black text-gray-900">Welcome Back</h1>
+            <p class="text-xs text-gray-500 font-medium">Log in to your account to place orders</p>
+        </div>
+
+        <form action="{% url 'accounts:login' %}" method="POST" class="space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Username or Email</label>
+                <div class="relative">
+                    <i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="text" name="username" id="username_input" required autofocus placeholder="Enter your username or email"
+                           class="w-full bg-gray-50 border-2 border-gray-200 focus:border-blinkit-green focus:bg-white rounded-2xl pl-11 pr-4 py-3 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Password</label>
+                <div class="relative">
+                    <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="password" name="password" id="password_input" required placeholder="Enter your password"
+                           class="w-full bg-gray-50 border-2 border-gray-200 focus:border-blinkit-green focus:bg-white rounded-2xl pl-11 pr-4 py-3 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition">
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-blinkit-green hover:bg-blinkit-darkgreen text-white font-extrabold py-3.5 rounded-2xl transition text-sm shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer mt-2">
+                <i class="fa-solid fa-right-to-bracket text-xs"></i>
+                <span>Log In</span>
+            </button>
+        </form>
+
+        <!-- Link to Register -->
+        <div class="text-center text-xs text-gray-600 pt-2 border-t border-gray-100">
+            Don't have an account? 
+            <a href="{% url 'accounts:register' %}{% if next %}?next={{ next }}{% endif %}" class="font-extrabold text-blinkit-green hover:underline ml-1">
+                Create New Account
+            </a>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

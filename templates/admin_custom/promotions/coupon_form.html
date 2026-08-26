@@ -1,0 +1,181 @@
+{% extends 'admin_custom/base_admin.html' %}
+
+{% block title %}{% if form_action == 'create' %}Create Coupon{% else %}Edit {{ coupon.code }}{% endif %} - Blinkit Admin{% endblock %}
+{% block page_heading %}{% if form_action == 'create' %}Create Promotional Coupon{% else %}Edit Coupon: {{ coupon.code }}{% endif %}{% endblock %}
+
+{% block page_badge %}
+<span class="bg-purple-100 text-purple-800 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
+    {% if form_action == 'create' %}New Promo Campaign{% else %}{{ coupon.code }}{% endif %}
+</span>
+{% endblock %}
+
+{% block admin_content %}
+<div class="max-w-3xl mx-auto space-y-6">
+
+    <div class="flex items-center justify-between">
+        <a href="{% url 'promotions_admin:list' %}" class="text-xs font-bold text-gray-500 hover:text-gray-900 flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Back to Coupons List</span>
+        </a>
+    </div>
+
+    <!-- Form Container Card -->
+    <form method="POST" class="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 sm:p-8 space-y-6">
+        {% csrf_token %}
+
+        <!-- Section 1: Code & Description -->
+        <div class="space-y-4">
+            <div class="border-b border-gray-100 pb-3">
+                <h3 class="text-base font-black text-gray-900 flex items-center gap-2">
+                    <i class="fa-solid fa-tag text-purple-600"></i>
+                    <span>Coupon Identity</span>
+                </h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2">
+                        Coupon Code (Uppercase) <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" 
+                           name="code" 
+                           value="{{ coupon.code|default:'' }}" 
+                           placeholder="e.g. WELCOME50" 
+                           required
+                           class="w-full bg-[#F4F6FB] text-sm font-mono font-black uppercase rounded-2xl px-4 py-3 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:outline-none transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2">
+                        Discount Type <span class="text-red-500">*</span>
+                    </label>
+                    <select name="discount_type" class="w-full bg-[#F4F6FB] text-sm font-bold text-gray-800 rounded-2xl px-4 py-3 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:outline-none transition">
+                        <option value="FLAT" {% if coupon.discount_type == 'FLAT' %}selected{% endif %}>Flat Amount (₹)</option>
+                        <option value="PERCENTAGE" {% if coupon.discount_type == 'PERCENTAGE' %}selected{% endif %}>Percentage (%)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2">
+                    Marketing Summary / Description <span class="text-red-500">*</span>
+                </label>
+                <input type="text" 
+                       name="description" 
+                       value="{{ coupon.description|default:'' }}" 
+                       placeholder="e.g. Flat ₹50 OFF on first order above ₹199" 
+                       required
+                       class="w-full bg-[#F4F6FB] text-sm font-semibold rounded-2xl px-4 py-3 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:outline-none transition">
+            </div>
+        </div>
+
+        <!-- Section 2: Discount Value & Criteria -->
+        <div class="space-y-4 pt-2">
+            <div class="border-b border-gray-100 pb-3">
+                <h3 class="text-base font-black text-gray-900 flex items-center gap-2">
+                    <i class="fa-solid fa-calculator text-purple-600"></i>
+                    <span>Discount Value & Order Criteria</span>
+                </h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2">
+                        Discount Value <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" 
+                           step="any"
+                           name="discount_value" 
+                           value="{{ coupon.discount_value|default:'' }}" 
+                           placeholder="e.g. 50 or 20" 
+                           required
+                           class="w-full bg-[#F4F6FB] text-sm font-black rounded-2xl px-4 py-3 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:outline-none transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2">
+                        Min Order Amount (₹)
+                    </label>
+                    <input type="number" 
+                           step="any"
+                           name="min_order_amount" 
+                           value="{{ coupon.min_order_amount|default:0 }}" 
+                           placeholder="e.g. 199" 
+                           class="w-full bg-[#F4F6FB] text-sm font-black rounded-2xl px-4 py-3 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:outline-none transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2">
+                        Max Cap (For % Type in ₹)
+                    </label>
+                    <input type="number" 
+                           step="any"
+                           name="max_discount_amount" 
+                           value="{{ coupon.max_discount_amount|default:'' }}" 
+                           placeholder="e.g. 100" 
+                           class="w-full bg-[#F4F6FB] text-sm font-black rounded-2xl px-4 py-3 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:outline-none transition">
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Usage Limits & Validity -->
+        <div class="space-y-4 pt-2">
+            <div class="border-b border-gray-100 pb-3">
+                <h3 class="text-base font-black text-gray-900 flex items-center gap-2">
+                    <i class="fa-solid fa-clock text-purple-600"></i>
+                    <span>Validity & Limits</span>
+                </h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2">
+                        Valid Duration (Days from now)
+                    </label>
+                    <input type="number" 
+                           name="valid_days" 
+                           value="30" 
+                           min="1" 
+                           max="365"
+                           class="w-full bg-[#F4F6FB] text-sm font-bold rounded-2xl px-4 py-3 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:outline-none transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2">
+                        Total Usage Redemptions Limit
+                    </label>
+                    <input type="number" 
+                           name="usage_limit" 
+                           value="{{ coupon.usage_limit|default:1000 }}" 
+                           min="1"
+                           class="w-full bg-[#F4F6FB] text-sm font-bold rounded-2xl px-4 py-3 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:outline-none transition">
+                </div>
+            </div>
+
+            <label class="flex items-center gap-3 cursor-pointer bg-[#F4F6FB] p-4 rounded-2xl hover:bg-emerald-50 transition border border-transparent hover:border-emerald-200 mt-2">
+                <input type="checkbox" 
+                       name="is_active" 
+                       {% if form_action == 'create' or coupon.is_active %}checked{% endif %}
+                       class="w-5 h-5 rounded-lg text-emerald-600 focus:ring-emerald-500 border-gray-300">
+                <div>
+                    <div class="text-xs font-extrabold text-gray-900">Active Status (Enabled for Checkout)</div>
+                    <div class="text-[11px] text-gray-500">When checked, customers can immediately apply this promo code during shopping.</div>
+                </div>
+            </label>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="pt-4 border-t border-gray-100 flex items-center justify-end gap-3">
+            <a href="{% url 'promotions_admin:list' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs px-5 py-3 rounded-2xl transition">
+                Cancel
+            </a>
+            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-6 py-3 rounded-2xl shadow-lg shadow-emerald-600/20 transition flex items-center gap-2">
+                <i class="fa-solid fa-check"></i>
+                <span>{% if form_action == 'create' %}Create Coupon{% else %}Save Changes{% endif %}</span>
+            </button>
+        </div>
+
+    </form>
+
+</div>
+{% endblock %}

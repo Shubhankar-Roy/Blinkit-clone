@@ -1,0 +1,162 @@
+{% extends 'admin_custom/base_admin.html' %}
+
+{% block title %}Order #{{ order.order_number }} - Blinkit Admin{% endblock %}
+{% block page_heading %}Order Inspector: #{{ order.order_number }}{% endblock %}
+
+{% block page_badge %}
+<span class="text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider {% if order.status == 'DELIVERED' %}bg-emerald-100 text-emerald-800{% elif order.status == 'CANCELLED' %}bg-red-100 text-red-800{% else %}bg-purple-100 text-purple-800{% endif %}">
+    {{ order.get_status_display }}
+</span>
+{% endblock %}
+
+{% block admin_content %}
+<div class="max-w-4xl mx-auto space-y-6">
+
+    <div class="flex items-center justify-between">
+        <a href="{% url 'orders_admin:list' %}" class="text-xs font-bold text-gray-500 hover:text-gray-900 flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Back to Live Dispatch Queue</span>
+        </a>
+    </div>
+
+    <!-- Status Advance Banner -->
+    <div class="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <div class="text-xs font-bold text-gray-500 uppercase tracking-wider">Current Pipeline Stage</div>
+            <div class="text-xl font-black text-gray-900 mt-0.5">{{ order.get_status_display }}</div>
+            <div class="text-xs text-gray-400 mt-1">Placed on {{ order.created_at|date:"M d, Y • h:i A" }}</div>
+        </div>
+
+        <!-- Stage Update Dropdown Form -->
+        <form action="{% url 'orders_admin:update_status' order_number=order.order_number %}" method="POST" class="flex items-center gap-2">
+            {% csrf_token %}
+            <select name="status" class="bg-[#F4F6FB] text-xs font-bold text-gray-800 rounded-xl px-3 py-2.5 border border-gray-200 focus:border-emerald-500 focus:outline-none">
+                <option value="PLACED" {% if order.status == 'PLACED' %}selected{% endif %}>Order Placed</option>
+                <option value="PACKING" {% if order.status == 'PACKING' %}selected{% endif %}>Packing at Hub</option>
+                <option value="OUT_FOR_DELIVERY" {% if order.status == 'OUT_FOR_DELIVERY' %}selected{% endif %}>Out for Delivery</option>
+                <option value="DELIVERED" {% if order.status == 'DELIVERED' %}selected{% endif %}>Delivered</option>
+                <option value="CANCELLED" {% if order.status == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+            </select>
+            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl transition shadow-sm">
+                Update Status
+            </button>
+        </form>
+    </div>
+
+    <!-- Details Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Customer & Delivery Address -->
+        <div class="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm space-y-4">
+            <h3 class="text-xs font-black text-gray-900 uppercase tracking-wider flex items-center gap-2">
+                <i class="fa-solid fa-location-dot text-emerald-600"></i>
+                <span>Customer & Destination</span>
+            </h3>
+
+            <div class="space-y-2 text-xs">
+                <div>
+                    <span class="text-gray-500">Customer Name:</span>
+                    <div class="font-black text-gray-900">{{ order.user.display_name|default:'Guest Customer' }}</div>
+                </div>
+                <div>
+                    <span class="text-gray-500">Phone:</span>
+                    <div class="font-black text-gray-900">📞 {{ order.phone }}</div>
+                </div>
+                <div>
+                    <span class="text-gray-500">Delivery Address:</span>
+                    <div class="font-bold text-gray-900 bg-[#F4F6FB] p-3 rounded-xl border border-gray-100 mt-1">
+                        {{ order.delivery_address }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dark Store & Logistics -->
+        <div class="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm space-y-4">
+            <h3 class="text-xs font-black text-gray-900 uppercase tracking-wider flex items-center gap-2">
+                <i class="fa-solid fa-warehouse text-purple-600"></i>
+                <span>Fulfillment & Logistics</span>
+            </h3>
+
+            <div class="space-y-2 text-xs">
+                <div>
+                    <span class="text-gray-500">Fulfillment Hub:</span>
+                    <div class="font-black text-gray-900">{{ order.dark_store.name|default:'Central Hub' }} ({{ order.dark_store.code|default:'DS-01' }})</div>
+                </div>
+                <div>
+                    <span class="text-gray-500">Assigned Delivery Partner:</span>
+                    <div class="font-black text-gray-900">🚴 {{ order.delivery_partner_name }}</div>
+                    <div class="text-[11px] text-gray-500">{{ order.delivery_partner_phone }}</div>
+                </div>
+                <div>
+                    <span class="text-gray-500">Delivery ETA:</span>
+                    <div class="font-black text-emerald-700 text-sm">~{{ order.eta_minutes }} Minutes Guaranteed</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Items List Card -->
+    <div class="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm space-y-4">
+        <h3 class="text-xs font-black text-gray-900 uppercase tracking-wider">Itemized Order Breakdown ({{ order.total_item_count }} items)</h3>
+
+        <div class="divide-y divide-gray-100 border border-gray-100 rounded-2xl overflow-hidden">
+            {% for item in items %}
+            <div class="p-4 flex items-center justify-between text-xs">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gray-50 p-1 flex items-center justify-center border border-gray-100 shrink-0">
+                        {% if item.product %}
+                        <img src="{{ item.product.get_image }}" alt="{{ item.product_name }}" class="max-h-full max-w-full object-contain">
+                        {% else %}
+                        <i class="fa-solid fa-box text-gray-400"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <div class="font-black text-gray-900">{{ item.product_name }}</div>
+                        <div class="text-gray-500">{{ item.unit_quantity }} • ₹{{ item.price|floatformat:0 }} each</div>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="font-extrabold text-gray-600">Qty: {{ item.quantity }}</div>
+                    <div class="font-black text-gray-900 text-sm">₹{{ item.subtotal|floatformat:0 }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Bill Details -->
+        <div class="bg-[#F4F6FB] p-4 rounded-2xl space-y-2 text-xs">
+            <div class="flex justify-between text-gray-600">
+                <span>Items Subtotal</span>
+                <span class="font-bold text-gray-900">₹{{ order.items_total|floatformat:0 }}</span>
+            </div>
+            {% if order.coupon_discount > 0 %}
+            <div class="flex justify-between text-emerald-700 font-bold">
+                <span>Coupon Discount</span>
+                <span>- ₹{{ order.coupon_discount|floatformat:0 }}</span>
+            </div>
+            {% endif %}
+            <div class="flex justify-between text-gray-600">
+                <span>Delivery Fee</span>
+                <span class="font-bold text-gray-900">{% if order.delivery_fee == 0 %}FREE{% else %}₹{{ order.delivery_fee|floatformat:0 }}{% endif %}</span>
+            </div>
+            <div class="flex justify-between text-gray-600">
+                <span>Handling Fee</span>
+                <span class="font-bold text-gray-900">₹{{ order.handling_fee|floatformat:0 }}</span>
+            </div>
+            {% if order.tip_amount > 0 %}
+            <div class="flex justify-between text-gray-700 font-bold">
+                <span>Delivery Partner Tip</span>
+                <span>+ ₹{{ order.tip_amount|floatformat:0 }}</span>
+            </div>
+            {% endif %}
+            <div class="flex justify-between items-center text-sm font-black text-gray-900 pt-2 border-t border-gray-200">
+                <span>Grand Total</span>
+                <span class="text-base text-gray-900 font-black">₹{{ order.grand_total|floatformat:0 }}</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

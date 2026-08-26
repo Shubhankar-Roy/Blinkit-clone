@@ -1,0 +1,257 @@
+{% extends 'admin_custom/base_admin.html' %}
+
+{% block title %}Live Order Dispatch - Blinkit Admin{% endblock %}
+{% block page_heading %}Live Order Dispatch & Delivery Queue{% endblock %}
+
+{% block page_badge %}
+<span class="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1.5">
+    <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-ping"></span>
+    <span>Live Queue</span>
+</span>
+{% endblock %}
+
+{% block admin_content %}
+<div class="space-y-6">
+
+    <!-- KPI Metric Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        
+        <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Orders</span>
+                <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">
+                    <i class="fa-solid fa-receipt text-sm"></i>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="text-2xl font-black text-gray-900">{{ total_orders_count }}</div>
+                <div class="text-[11px] font-bold text-blue-700 mt-1">₹{{ total_revenue|floatformat:0 }} collected</div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">New Placed</span>
+                <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+                    <i class="fa-solid fa-bell text-sm animate-bounce"></i>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="text-2xl font-black text-amber-700">{{ placed_count }}</div>
+                <div class="text-[11px] font-bold text-amber-800 mt-1">Awaiting hub pickup</div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Packing in Hub</span>
+                <div class="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
+                    <i class="fa-solid fa-box-open text-sm"></i>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="text-2xl font-black text-purple-700">{{ packing_count }}</div>
+                <div class="text-[11px] font-bold text-purple-800 mt-1">Item verification</div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">On The Way</span>
+                <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                    <i class="fa-solid fa-motorcycle text-sm"></i>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="text-2xl font-black text-emerald-700">{{ out_for_delivery_count }}</div>
+                <div class="text-[11px] font-bold text-emerald-800 mt-1">Rider en route</div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Delivered</span>
+                <div class="w-8 h-8 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center">
+                    <i class="fa-solid fa-circle-check text-sm"></i>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="text-2xl font-black text-teal-700">{{ delivered_count }}</div>
+                <div class="text-[11px] font-bold text-teal-800 mt-1">Completed deliveries</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Filter & Search Toolbar -->
+    <div class="bg-white rounded-3xl border border-gray-200 p-5 shadow-sm space-y-4">
+        <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            
+            <!-- Search -->
+            <div>
+                <label class="block text-[11px] font-extrabold text-gray-600 uppercase tracking-wider mb-1">Search Order</label>
+                <input type="text" 
+                       name="q" 
+                       value="{{ search_query }}" 
+                       placeholder="Order #, Phone, Address..." 
+                       class="w-full bg-[#F4F6FB] text-xs font-bold rounded-xl px-3.5 py-2.5 border border-gray-200 focus:border-emerald-500 focus:outline-none">
+            </div>
+
+            <!-- Status Filter -->
+            <div>
+                <label class="block text-[11px] font-extrabold text-gray-600 uppercase tracking-wider mb-1">Lifecycle Stage</label>
+                <select name="status" onchange="this.form.submit()" class="w-full bg-[#F4F6FB] text-xs font-bold text-gray-800 rounded-xl px-3 py-2.5 border border-gray-200 focus:border-emerald-500 focus:outline-none">
+                    <option value="ALL" {% if status_filter == 'ALL' %}selected{% endif %}>All Stages ({{ total_orders_count }})</option>
+                    <option value="PLACED" {% if status_filter == 'PLACED' %}selected{% endif %}>Placed ({{ placed_count }})</option>
+                    <option value="PACKING" {% if status_filter == 'PACKING' %}selected{% endif %}>Packing ({{ packing_count }})</option>
+                    <option value="OUT_FOR_DELIVERY" {% if status_filter == 'OUT_FOR_DELIVERY' %}selected{% endif %}>Out for Delivery ({{ out_for_delivery_count }})</option>
+                    <option value="DELIVERED" {% if status_filter == 'DELIVERED' %}selected{% endif %}>Delivered ({{ delivered_count }})</option>
+                    <option value="CANCELLED" {% if status_filter == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+                </select>
+            </div>
+
+            <!-- Dark Store Hub Filter -->
+            <div>
+                <label class="block text-[11px] font-extrabold text-gray-600 uppercase tracking-wider mb-1">Fulfillment Hub</label>
+                <select name="store" onchange="this.form.submit()" class="w-full bg-[#F4F6FB] text-xs font-bold text-gray-800 rounded-xl px-3 py-2.5 border border-gray-200 focus:border-emerald-500 focus:outline-none">
+                    <option value="ALL" {% if store_filter == 'ALL' %}selected{% endif %}>All Dark Stores</option>
+                    {% for store in dark_stores %}
+                    <option value="{{ store.id }}" {% if store_filter == store.id|stringformat:"s" %}selected{% endif %}>{{ store.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Filter Buttons -->
+            <div class="flex items-end gap-2">
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs py-2.5 rounded-xl transition shadow-sm">
+                    Filter Queue
+                </button>
+                <a href="{% url 'orders_admin:list' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs p-2.5 rounded-xl transition" title="Reset Filters">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </a>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Live Orders Table -->
+    <div class="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead>
+                    <tr class="bg-gray-50 text-gray-500 font-bold uppercase tracking-wider border-b border-gray-200">
+                        <th class="py-4 px-6">Order Details</th>
+                        <th class="py-4 px-6">Customer & Address</th>
+                        <th class="py-4 px-6">Dark Store Hub</th>
+                        <th class="py-4 px-6">Amount & Payment</th>
+                        <th class="py-4 px-6">Status Stage</th>
+                        <th class="py-4 px-6 text-right">Dispatch Controls</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 font-medium">
+                    {% for order in orders %}
+                    <tr class="hover:bg-emerald-50/30 transition">
+                        
+                        <!-- Order # & Time -->
+                        <td class="py-4 px-6">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-black text-sm shrink-0">
+                                    <i class="fa-solid fa-box"></i>
+                                </div>
+                                <div>
+                                    <a href="{% url 'orders_admin:detail' order_number=order.order_number %}" class="font-mono text-sm font-black text-gray-900 hover:text-emerald-600 transition">
+                                        #{{ order.order_number }}
+                                    </a>
+                                    <div class="text-[11px] text-gray-400 font-medium">{{ order.created_at|date:"M d, h:i A" }}</div>
+                                    <div class="text-[10px] text-gray-500 font-bold mt-0.5">{{ order.total_item_count }} item{{ order.total_item_count|pluralize }}</div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Customer & Phone -->
+                        <td class="py-4 px-6">
+                            <div class="font-extrabold text-gray-900">{{ order.user.display_name|default:order.phone }}</div>
+                            <div class="text-[11px] text-gray-500 font-medium truncate max-w-xs">{{ order.delivery_address }}</div>
+                            <div class="text-[10px] text-emerald-700 font-bold mt-0.5">📞 {{ order.phone }}</div>
+                        </td>
+
+                        <!-- Dark Store Hub -->
+                        <td class="py-4 px-6">
+                            <div class="font-bold text-gray-900">{{ order.dark_store.name|default:'Central Hub' }}</div>
+                            <div class="text-[10px] text-gray-400 font-semibold">{{ order.dark_store.code|default:'DS-01' }} • ETA ~{{ order.eta_minutes }}m</div>
+                        </td>
+
+                        <!-- Amount & Payment -->
+                        <td class="py-4 px-6">
+                            <div class="font-black text-gray-900 text-sm">₹{{ order.grand_total|floatformat:0 }}</div>
+                            <div class="mt-0.5">
+                                <span class="text-[10px] font-black px-2 py-0.5 rounded uppercase {% if order.payment_status == 'SUCCESS' %}bg-emerald-100 text-emerald-800{% elif order.payment_status == 'PENDING' %}bg-amber-100 text-amber-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                    {{ order.payment_method }} • {{ order.payment_status }}
+                                </span>
+                            </div>
+                        </td>
+
+                        <!-- Status Stage -->
+                        <td class="py-4 px-6">
+                            <span class="text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider inline-flex items-center gap-1.5 {% if order.status == 'PLACED' %}bg-amber-100 text-amber-800{% elif order.status == 'PACKING' %}bg-purple-100 text-purple-800{% elif order.status == 'OUT_FOR_DELIVERY' %}bg-blue-100 text-blue-800 animate-pulse{% elif order.status == 'DELIVERED' %}bg-emerald-100 text-emerald-800{% else %}bg-gray-100 text-gray-700{% endif %}">
+                                <span class="w-1.5 h-1.5 rounded-full {% if order.status == 'DELIVERED' %}bg-emerald-600{% elif order.status == 'CANCELLED' %}bg-red-600{% else %}bg-current{% endif %}"></span>
+                                <span>{{ order.get_status_display }}</span>
+                            </span>
+                        </td>
+
+                        <!-- 1-Click Status Controls -->
+                        <td class="py-4 px-6 text-right">
+                            <div class="flex items-center justify-end gap-1.5">
+                                
+                                {% if order.status == 'PLACED' %}
+                                <form action="{% url 'orders_admin:update_status' order_number=order.order_number %}" method="POST" class="inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="status" value="PACKING">
+                                    <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-[11px] px-3 py-1.5 rounded-xl transition shadow-sm">
+                                        Pack Order
+                                    </button>
+                                </form>
+                                {% elif order.status == 'PACKING' %}
+                                <form action="{% url 'orders_admin:update_status' order_number=order.order_number %}" method="POST" class="inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="status" value="OUT_FOR_DELIVERY">
+                                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[11px] px-3 py-1.5 rounded-xl transition shadow-sm">
+                                        Dispatch Rider
+                                    </button>
+                                </form>
+                                {% elif order.status == 'OUT_FOR_DELIVERY' %}
+                                <form action="{% url 'orders_admin:update_status' order_number=order.order_number %}" method="POST" class="inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="status" value="DELIVERED">
+                                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[11px] px-3 py-1.5 rounded-xl transition shadow-sm">
+                                        Mark Delivered
+                                    </button>
+                                </form>
+                                {% endif %}
+
+                                <a href="{% url 'orders_admin:detail' order_number=order.order_number %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold p-2 rounded-xl transition" title="View Order Inspector">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+
+                            </div>
+                        </td>
+
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="py-12 text-center text-gray-400">
+                            <div class="w-16 h-16 rounded-3xl bg-gray-100 flex items-center justify-center mx-auto mb-3 text-gray-400 text-2xl">
+                                <i class="fa-solid fa-receipt"></i>
+                            </div>
+                            <div class="text-sm font-bold text-gray-700">No orders found in queue.</div>
+                            <p class="text-xs text-gray-400 mt-1">Orders placed by customers will appear here in real time.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

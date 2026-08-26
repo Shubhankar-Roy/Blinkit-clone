@@ -1,0 +1,232 @@
+{% extends 'admin_custom/base_admin.html' %}
+
+{% block title %}Product Catalog - Blinkit Admin{% endblock %}
+{% block page_heading %}Merchant Product Catalog & Inventory{% endblock %}
+
+{% block page_badge %}
+<span class="bg-purple-100 text-purple-800 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
+    {{ products.count }} Items
+</span>
+{% endblock %}
+
+{% block admin_content %}
+<div class="space-y-6">
+
+    <!-- KPI Metric Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Products</span>
+                <div class="w-8 h-8 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center">
+                    <i class="fa-solid fa-boxes-stacked text-sm"></i>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="text-2xl font-black text-gray-900">{{ total_count }}</div>
+                <div class="text-[11px] font-bold text-purple-700 mt-1">Active grocery items</div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Categories</span>
+                <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                    <i class="fa-solid fa-layer-group text-sm"></i>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="text-2xl font-black text-emerald-700">{{ categories.count }}</div>
+                <div class="text-[11px] font-bold text-emerald-800 mt-1">Departments configured</div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Out of Stock</span>
+                <div class="w-8 h-8 rounded-xl bg-red-100 text-red-700 flex items-center justify-center">
+                    <i class="fa-solid fa-triangle-exclamation text-sm"></i>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="text-2xl font-black text-red-700">{{ out_of_stock_count }}</div>
+                <div class="text-[11px] font-bold text-red-800 mt-1">Requires replenishment</div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">In Stock Available</span>
+                <div class="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center">
+                    <i class="fa-solid fa-circle-check text-sm"></i>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="text-2xl font-black text-teal-700">{{ total_count|add:"-"|add:out_of_stock_count }}</div>
+                <div class="text-[11px] font-bold text-teal-800 mt-1">Ready for 10-min dispatch</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Filter & Search Toolbar -->
+    <div class="bg-white rounded-3xl border border-gray-200 p-5 shadow-sm space-y-4">
+        <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            
+            <!-- Search -->
+            <div>
+                <label class="block text-[11px] font-extrabold text-gray-600 uppercase tracking-wider mb-1">Search Products</label>
+                <input type="text" 
+                       name="q" 
+                       value="{{ search_query }}" 
+                       placeholder="Name, Description..." 
+                       class="w-full bg-[#F4F6FB] text-xs font-bold rounded-xl px-3.5 py-2.5 border border-gray-200 focus:border-emerald-500 focus:outline-none">
+            </div>
+
+            <!-- Category Filter -->
+            <div>
+                <label class="block text-[11px] font-extrabold text-gray-600 uppercase tracking-wider mb-1">Category</label>
+                <select name="category" onchange="this.form.submit()" class="w-full bg-[#F4F6FB] text-xs font-bold text-gray-800 rounded-xl px-3 py-2.5 border border-gray-200 focus:border-emerald-500 focus:outline-none">
+                    <option value="ALL" {% if category_id == 'ALL' %}selected{% endif %}>All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if category_id == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Stock Availability Filter -->
+            <div>
+                <label class="block text-[11px] font-extrabold text-gray-600 uppercase tracking-wider mb-1">Stock Status</label>
+                <select name="stock" onchange="this.form.submit()" class="w-full bg-[#F4F6FB] text-xs font-bold text-gray-800 rounded-xl px-3 py-2.5 border border-gray-200 focus:border-emerald-500 focus:outline-none">
+                    <option value="ALL" {% if stock_status == 'ALL' %}selected{% endif %}>All Products</option>
+                    <option value="IN_STOCK" {% if stock_status == 'IN_STOCK' %}selected{% endif %}>In Stock Only</option>
+                    <option value="OUT_OF_STOCK" {% if stock_status == 'OUT_OF_STOCK' %}selected{% endif %}>Out of Stock Only</option>
+                </select>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-end gap-2">
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs py-2.5 rounded-xl transition shadow-sm">
+                    Filter Catalog
+                </button>
+                <a href="{% url 'admin_dashboard:products' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs p-2.5 rounded-xl transition" title="Reset Filters">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </a>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Products Table -->
+    <div class="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead>
+                    <tr class="bg-gray-50 text-gray-500 font-bold uppercase tracking-wider border-b border-gray-200">
+                        <th class="py-4 px-6">Product Details</th>
+                        <th class="py-4 px-6">Category & Unit</th>
+                        <th class="py-4 px-6">Pricing & Discount</th>
+                        <th class="py-4 px-6">Badges</th>
+                        <th class="py-4 px-6">Stock Status</th>
+                        <th class="py-4 px-6 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 font-medium">
+                    {% for product in products %}
+                    <tr class="hover:bg-emerald-50/30 transition">
+                        
+                        <!-- Product Name & Image -->
+                        <td class="py-4 px-6">
+                            <div class="flex items-center gap-3.5">
+                                <div class="w-12 h-12 rounded-2xl bg-gray-50 p-1.5 flex items-center justify-center border border-gray-100 shrink-0">
+                                    <img src="{{ product.get_image }}" alt="{{ product.name }}" class="max-h-full max-w-full object-contain">
+                                </div>
+                                <div class="min-w-0">
+                                    <a href="{% url 'admin_dashboard:product_edit' product_id=product.id %}" class="text-sm font-black text-gray-900 hover:text-emerald-600 transition truncate block max-w-xs">
+                                        {{ product.name }}
+                                    </a>
+                                    <div class="text-[11px] text-gray-400 font-medium truncate max-w-xs">{{ product.description|default:'No description' }}</div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Category & Unit -->
+                        <td class="py-4 px-6">
+                            <div class="font-black text-gray-900">{{ product.category.name }}</div>
+                            <div class="text-[11px] text-gray-500 font-semibold mt-0.5">Unit: {{ product.unit_quantity }}</div>
+                        </td>
+
+                        <!-- Pricing -->
+                        <td class="py-4 px-6">
+                            <div class="font-black text-gray-900 text-sm">₹{{ product.selling_price|floatformat:0 }}</div>
+                            {% if product.discount_percentage > 0 %}
+                            <div class="text-[10px] text-gray-400 line-through">MRP ₹{{ product.mrp|floatformat:0 }}</div>
+                            <span class="text-[10px] bg-blue-50 text-blue-700 font-bold px-1.5 py-0.2 rounded">{{ product.discount_percentage }}% OFF</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Badges -->
+                        <td class="py-4 px-6">
+                            <div class="flex flex-wrap gap-1">
+                                {% if product.is_bestseller %}
+                                <span class="bg-amber-100 text-amber-800 text-[10px] font-black px-2 py-0.5 rounded">BESTSELLER</span>
+                                {% endif %}
+                                {% if product.is_trending %}
+                                <span class="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded">TRENDING</span>
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <!-- 1-Click Live Stock Toggle -->
+                        <td class="py-4 px-6">
+                            <form action="{% url 'admin_dashboard:product_toggle_stock' product_id=product.id %}" method="POST" class="inline">
+                                {% csrf_token %}
+                                <button type="submit" 
+                                        title="Click to toggle stock status"
+                                        class="inline-flex items-center gap-1.5 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider transition cursor-pointer {% if not product.is_out_of_stock and product.is_active %}bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100{% else %}bg-red-50 text-red-800 border border-red-200 hover:bg-red-100{% endif %}">
+                                    <span class="w-1.5 h-1.5 rounded-full {% if not product.is_out_of_stock and product.is_active %}bg-emerald-600{% else %}bg-red-600{% endif %}"></span>
+                                    <span>{% if not product.is_out_of_stock and product.is_active %}In Stock{% else %}Out of Stock{% endif %}</span>
+                                </button>
+                            </form>
+                        </td>
+
+                        <!-- Actions -->
+                        <td class="py-4 px-6 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <a href="{% url 'admin_dashboard:product_edit' product_id=product.id %}" 
+                                   class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs p-2 rounded-xl transition"
+                                   title="Edit Product">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+                                <form action="{% url 'admin_dashboard:product_delete' product_id=product.id %}" method="POST" class="inline" onsubmit="return confirm('Delete product {{ product.name }}?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs p-2 rounded-xl transition cursor-pointer" title="Delete Product">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="py-12 text-center text-gray-400">
+                            <div class="w-16 h-16 rounded-3xl bg-gray-100 flex items-center justify-center mx-auto mb-3 text-gray-400 text-2xl">
+                                <i class="fa-solid fa-boxes-stacked"></i>
+                            </div>
+                            <div class="text-sm font-bold text-gray-700">No products found in catalog.</div>
+                            <div class="mt-4">
+                                <a href="{% url 'admin_dashboard:product_add' %}" class="bg-emerald-600 text-white text-xs font-extrabold px-4 py-2 rounded-xl">
+                                    Add New Product
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

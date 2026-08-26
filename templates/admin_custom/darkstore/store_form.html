@@ -1,0 +1,246 @@
+{% extends 'admin_custom/base_admin.html' %}
+
+{% block title %}{% if form_action == 'create' %}New Dark Store{% else %}Edit {{ store.name }}{% endif %} - Blinkit Admin{% endblock %}
+{% block page_heading %}{% if form_action == 'create' %}Create Dark Store Hub{% else %}Edit Dark Store: {{ store.name }}{% endif %}{% endblock %}
+
+{% block page_badge %}
+<span class="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
+    {% if form_action == 'create' %}New Fulfillment Center{% else %}{{ store.code }}{% endif %}
+</span>
+{% endblock %}
+
+{% block admin_content %}
+<div class="max-w-4xl mx-auto space-y-6">
+
+    <div class="flex items-center justify-between">
+        <a href="{% url 'darkstore_admin:list' %}" class="text-xs font-bold text-gray-500 hover:text-gray-900 flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Back to Fleet Overview</span>
+        </a>
+    </div>
+
+    <!-- Form Container Card -->
+    <form method="POST" class="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 sm:p-8 space-y-8">
+        {% csrf_token %}
+
+        <!-- Section 1: Store Identification -->
+        <div>
+            <div class="border-b border-gray-100 pb-3 mb-5">
+                <h3 class="text-base font-black text-gray-900 flex items-center gap-2">
+                    <i class="fa-solid fa-warehouse text-emerald-600"></i>
+                    <span>Store Hub Profile</span>
+                </h3>
+                <p class="text-xs text-gray-500 font-medium">Core identification and management contact for the micro-fulfillment center.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                
+                <div>
+                    <label class="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2">
+                        Dark Store Name <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" 
+                           name="name" 
+                           value="{{ store.name|default:'' }}" 
+                           placeholder="e.g. Koramangala Dark Hub #01" 
+                           required
+                           class="w-full bg-[#F4F6FB] text-sm font-semibold rounded-2xl px-4 py-3 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2">
+                        Store Code (Unique) <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" 
+                           name="code" 
+                           value="{{ store.code|default:'' }}" 
+                           placeholder="e.g. DS-BLR-01" 
+                           required
+                           class="w-full bg-[#F4F6FB] text-sm font-mono font-bold uppercase rounded-2xl px-4 py-3 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2">
+                        Store Supervisor / Manager
+                    </label>
+                    <input type="text" 
+                           name="manager_name" 
+                           value="{{ store.manager_name|default:'' }}" 
+                           placeholder="e.g. Ramesh Kumar" 
+                           class="w-full bg-[#F4F6FB] text-sm font-semibold rounded-2xl px-4 py-3 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2">
+                        Manager Contact Phone
+                    </label>
+                    <input type="text" 
+                           name="contact_phone" 
+                           value="{{ store.contact_phone|default:'+91 9876543210' }}" 
+                           placeholder="+91 9880123456" 
+                           class="w-full bg-[#F4F6FB] text-sm font-semibold rounded-2xl px-4 py-3 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition">
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Section 2: Address & Pincode Coverage -->
+        <div>
+            <div class="border-b border-gray-100 pb-3 mb-5">
+                <h3 class="text-base font-black text-gray-900 flex items-center gap-2">
+                    <i class="fa-solid fa-map-location-dot text-emerald-600"></i>
+                    <span>Location & Serviceable Pincodes</span>
+                </h3>
+                <p class="text-xs text-gray-500 font-medium">Define which localities and pincodes this dark store serves for 10-minute instant delivery.</p>
+            </div>
+
+            <div class="space-y-5">
+                
+                <div>
+                    <label class="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2">
+                        Physical Address
+                    </label>
+                    <textarea name="address" 
+                              rows="2" 
+                              placeholder="e.g. 80 Feet Road, 4th Block, Koramangala, Bengaluru" 
+                              class="w-full bg-[#F4F6FB] text-sm font-semibold rounded-2xl px-4 py-3 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition">{{ store.address|default:'' }}</textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2">
+                            City
+                        </label>
+                        <input type="text" 
+                               name="city" 
+                               value="{{ store.city|default:'Bengaluru' }}" 
+                               placeholder="Bengaluru" 
+                               required
+                               class="w-full bg-[#F4F6FB] text-sm font-semibold rounded-2xl px-4 py-3 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:outline-none transition">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2">
+                            State
+                        </label>
+                        <input type="text" 
+                               name="state" 
+                               value="{{ store.state|default:'Karnataka' }}" 
+                               placeholder="Karnataka" 
+                               required
+                               class="w-full bg-[#F4F6FB] text-sm font-semibold rounded-2xl px-4 py-3 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:outline-none transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2">
+                        Serviceable Pincodes (Comma-separated) <span class="text-red-500">*</span>
+                    </label>
+                    <textarea name="serviceable_pincodes" 
+                              rows="3" 
+                              required
+                              placeholder="e.g. 560034, 560095, 560047, 560100" 
+                              class="w-full bg-[#F4F6FB] text-sm font-mono font-bold rounded-2xl px-4 py-3 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition">{{ store.serviceable_pincodes|default:'' }}</textarea>
+                    <p class="text-[11px] text-gray-400 font-medium mt-1">Separate multiple 6-digit pincodes with commas. The location engine routes orders to this store when any of these pincodes are selected.</p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Section 3: Geolocation Coordinates & SLA Turnaround -->
+        <div>
+            <div class="border-b border-gray-100 pb-3 mb-5">
+                <h3 class="text-base font-black text-gray-900 flex items-center gap-2">
+                    <i class="fa-solid fa-stopwatch text-emerald-600"></i>
+                    <span>Delivery Turnaround & GPS Geolocation</span>
+                </h3>
+                <p class="text-xs text-gray-500 font-medium">Delivery SLA promise and coordinates used for live rider routing calculation.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                
+                <div>
+                    <label class="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2">
+                        Avg Delivery Turnaround (Minutes)
+                    </label>
+                    <div class="relative">
+                        <input type="number" 
+                               name="avg_delivery_mins" 
+                               value="{{ store.avg_delivery_mins|default:10 }}" 
+                               min="5" 
+                               max="60" 
+                               required
+                               class="w-full bg-[#F4F6FB] text-sm font-black rounded-2xl pl-4 pr-16 py-3 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:outline-none transition">
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">MINS</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2">
+                        Latitude Coordinate
+                    </label>
+                    <input type="number" 
+                           step="any" 
+                           name="latitude" 
+                           value="{{ store.latitude|default:12.9352 }}" 
+                           class="w-full bg-[#F4F6FB] text-sm font-mono font-bold rounded-2xl px-4 py-3 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:outline-none transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2">
+                        Longitude Coordinate
+                    </label>
+                    <input type="number" 
+                           step="any" 
+                           name="longitude" 
+                           value="{{ store.longitude|default:77.6245 }}" 
+                           class="w-full bg-[#F4F6FB] text-sm font-mono font-bold rounded-2xl px-4 py-3 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:outline-none transition">
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Section 4: Operational Switches -->
+        <div class="pt-2 border-t border-gray-100 space-y-4">
+            
+            <label class="flex items-center gap-3 cursor-pointer bg-[#F4F6FB] p-4 rounded-2xl hover:bg-emerald-50 transition border border-transparent hover:border-emerald-200">
+                <input type="checkbox" 
+                       name="is_active" 
+                       {% if form_action == 'create' or store.is_active %}checked{% endif %}
+                       class="w-5 h-5 rounded-lg text-emerald-600 focus:ring-emerald-500 border-gray-300">
+                <div>
+                    <div class="text-xs font-extrabold text-gray-900">Operational Status (Active / Open)</div>
+                    <div class="text-[11px] text-gray-500">When checked, this dark store actively receives orders and serves customers in its pincodes.</div>
+                </div>
+            </label>
+
+            {% if form_action == 'create' %}
+            <label class="flex items-center gap-3 cursor-pointer bg-[#F4F6FB] p-4 rounded-2xl hover:bg-emerald-50 transition border border-transparent hover:border-emerald-200">
+                <input type="checkbox" 
+                       name="auto_seed_inventory" 
+                       checked
+                       class="w-5 h-5 rounded-lg text-emerald-600 focus:ring-emerald-500 border-gray-300">
+                <div>
+                    <div class="text-xs font-extrabold text-gray-900">Auto-initialize Catalog Stock (Recommended)</div>
+                    <div class="text-[11px] text-gray-500">Automatically creates inventory entries with 50 units for all active catalog products in this dark store.</div>
+                </div>
+            </label>
+            {% endif %}
+
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="pt-4 border-t border-gray-100 flex items-center justify-end gap-3">
+            <a href="{% url 'darkstore_admin:list' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs px-5 py-3 rounded-2xl transition">
+                Cancel
+            </a>
+            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-6 py-3 rounded-2xl shadow-lg shadow-emerald-600/20 transition flex items-center gap-2">
+                <i class="fa-solid fa-check"></i>
+                <span>{% if form_action == 'create' %}Create Dark Store{% else %}Save Changes{% endif %}</span>
+            </button>
+        </div>
+
+    </form>
+
+</div>
+{% endblock %}

@@ -1,0 +1,175 @@
+{% extends 'admin_custom/base_admin.html' %}
+
+{% block title %}Dark Store Fleet - Blinkit Admin{% endblock %}
+{% block page_heading %}Dark Store Fleet Management{% endblock %}
+
+{% block page_badge %}
+<span class="bg-slate-900 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
+    {{ stores.count }} Stores Registered
+</span>
+{% endblock %}
+
+{% block admin_content %}
+<div class="space-y-6">
+
+    <!-- Filters & Search Bar Strip -->
+    <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+        
+        <!-- Search Input Form -->
+        <form method="GET" class="flex items-center gap-2 w-full md:w-96">
+            <div class="relative w-full">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                <input type="text" 
+                       name="q" 
+                       value="{{ query }}" 
+                       placeholder="Search by store name, code, pincode..." 
+                       class="w-full bg-[#F4F6FB] text-xs font-semibold rounded-xl pl-9 pr-3 py-2.5 border border-transparent focus:border-emerald-500 focus:bg-white focus:outline-none transition">
+            </div>
+            {% if city_filter %}
+            <input type="hidden" name="city" value="{{ city_filter }}">
+            {% endif %}
+            {% if status_filter %}
+            <input type="hidden" name="status" value="{{ status_filter }}">
+            {% endif %}
+            <button type="submit" class="bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold px-3 py-2.5 rounded-xl transition">
+                Search
+            </button>
+        </form>
+
+        <!-- Filter Pills -->
+        <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto">
+            <a href="?q={{ query }}" 
+               class="px-3 py-1.5 rounded-xl text-xs font-extrabold transition {% if not status_filter %}bg-slate-900 text-white{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
+                All ({{ stores.count }})
+            </a>
+            <a href="?status=active{% if query %}&q={{ query }}{% endif %}" 
+               class="px-3 py-1.5 rounded-xl text-xs font-extrabold transition {% if status_filter == 'active' %}bg-emerald-600 text-white{% else %}bg-emerald-50 text-emerald-800 hover:bg-emerald-100{% endif %}">
+                ● Open / Active
+            </a>
+            <a href="?status=inactive{% if query %}&q={{ query }}{% endif %}" 
+               class="px-3 py-1.5 rounded-xl text-xs font-extrabold transition {% if status_filter == 'inactive' %}bg-red-600 text-white{% else %}bg-red-50 text-red-700 hover:bg-red-100{% endif %}">
+                ○ Closed / Inactive
+            </a>
+        </div>
+
+    </div>
+
+    <!-- Stores Table Container -->
+    <div class="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead>
+                    <tr class="bg-gray-50/75 text-gray-500 font-bold uppercase tracking-wider border-b border-gray-200">
+                        <th class="py-4 px-6">Store Details</th>
+                        <th class="py-4 px-6">Coverage Area</th>
+                        <th class="py-4 px-6">Avg ETA</th>
+                        <th class="py-4 px-6">Live Inventory</th>
+                        <th class="py-4 px-6">Status</th>
+                        <th class="py-4 px-6 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 font-medium">
+                    {% for store in stores %}
+                    <tr class="hover:bg-emerald-50/30 transition">
+                        
+                        <!-- Store Info -->
+                        <td class="py-4 px-6">
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-sm">
+                                    <i class="fa-solid fa-warehouse text-emerald-400"></i>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-extrabold text-gray-900 text-sm">{{ store.name }}</span>
+                                        <span class="bg-slate-100 text-slate-800 font-mono text-[10px] font-bold px-1.5 py-0.5 rounded">{{ store.code }}</span>
+                                    </div>
+                                    <div class="text-gray-500 text-[11px] mt-0.5 max-w-xs truncate">{{ store.address }}</div>
+                                    <div class="text-gray-400 text-[10px] mt-0.5">
+                                        <i class="fa-solid fa-user-tie text-emerald-600 mr-1"></i>{{ store.manager_name|default:'Manager' }} • {{ store.contact_phone }}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Coverage Area -->
+                        <td class="py-4 px-6">
+                            <div class="text-gray-900 font-bold">{{ store.pincode_count }} Pincodes Covered</div>
+                            <div class="flex flex-wrap gap-1 mt-1 max-w-xs">
+                                {% for p in store.pincode_list|slice:":3" %}
+                                <span class="bg-slate-100 text-slate-700 font-mono text-[10px] font-bold px-1.5 py-0.5 rounded">
+                                    {{ p }}
+                                </span>
+                                {% endfor %}
+                                {% if store.pincode_count > 3 %}
+                                <span class="text-gray-400 text-[10px] font-semibold self-center">+{{ store.pincode_count|add:"-3" }} more</span>
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <!-- Delivery Turnaround -->
+                        <td class="py-4 px-6">
+                            <div class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 font-extrabold px-2.5 py-1 rounded-xl text-xs border border-emerald-200">
+                                <i class="fa-solid fa-bolt text-emerald-600"></i>
+                                <span>{{ store.avg_delivery_mins }} MINS</span>
+                            </div>
+                        </td>
+
+                        <!-- Stock Summary -->
+                        <td class="py-4 px-6">
+                            <div class="font-black text-gray-900 text-xs">{{ store.total_stock_units }} Units</div>
+                            <div class="text-[11px] text-gray-500">{{ store.total_inventory_items }} Catalog SKUs</div>
+                            {% if store.low_stock_count > 0 %}
+                            <div class="text-[10px] font-bold text-amber-600 mt-0.5">⚠️ {{ store.low_stock_count }} items low in stock</div>
+                            {% endif %}
+                        </td>
+
+                        <!-- Operational Status -->
+                        <td class="py-4 px-6">
+                            <a href="{% url 'darkstore_admin:toggle' store_id=store.id %}" 
+                               title="Click to toggle status"
+                               class="inline-flex items-center gap-1.5 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider transition {% if store.is_active %}bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100{% else %}bg-red-50 text-red-700 border border-red-200 hover:bg-red-100{% endif %}">
+                                <span class="w-1.5 h-1.5 rounded-full {% if store.is_active %}bg-emerald-600{% else %}bg-red-500{% endif %}"></span>
+                                <span>{% if store.is_active %}Active (Open){% else %}Inactive (Closed){% endif %}</span>
+                            </a>
+                        </td>
+
+                        <!-- Action Buttons -->
+                        <td class="py-4 px-6 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <a href="{% url 'darkstore_admin:inventory' store_id=store.id %}" 
+                                   class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm shadow-emerald-600/20">
+                                    <i class="fa-solid fa-boxes-stacked"></i>
+                                    <span>Stock Matrix</span>
+                                </a>
+                                <a href="{% url 'darkstore_admin:edit' store_id=store.id %}" 
+                                   class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs p-2 rounded-xl transition"
+                                   title="Edit Store Information">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+                            </div>
+                        </td>
+
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="py-12 text-center text-gray-400">
+                            <div class="w-16 h-16 rounded-3xl bg-gray-100 flex items-center justify-center mx-auto mb-3 text-gray-400 text-2xl">
+                                <i class="fa-solid fa-warehouse"></i>
+                            </div>
+                            <div class="text-sm font-bold text-gray-700">No Dark Stores match the criteria.</div>
+                            <div class="text-xs text-gray-400 mt-1">Try resetting filters or register a new store hub.</div>
+                            <div class="mt-4">
+                                <a href="{% url 'darkstore_admin:create' %}" class="bg-emerald-600 text-white text-xs font-extrabold px-4 py-2 rounded-xl">
+                                    Add Dark Store
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

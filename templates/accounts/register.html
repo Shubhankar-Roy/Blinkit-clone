@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Account - Blinkit{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto px-4 py-12">
+    
+    <div class="bg-white rounded-3xl border border-gray-200 p-8 shadow-sm space-y-6">
+        
+        <!-- Header -->
+        <div class="text-center space-y-2">
+            <span class="text-4xl font-black tracking-tight text-blinkit-yellow">blink<span class="text-blinkit-green">it</span></span>
+            <h1 class="text-2xl font-black text-gray-900">Create a New Account</h1>
+            <p class="text-xs text-gray-500 font-medium">Sign up to start ordering instant groceries</p>
+        </div>
+
+        <form action="{% url 'accounts:register' %}" method="POST" class="space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+
+            <!-- Full Name -->
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wide">Full Name *</label>
+                <div class="relative">
+                    <i class="fa-regular fa-id-card absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="text" name="full_name" required autofocus placeholder="e.g. Priya Sharma"
+                           class="w-full bg-gray-50 border-2 border-gray-200 focus:border-blinkit-green focus:bg-white rounded-2xl pl-11 pr-4 py-2.5 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition">
+                </div>
+            </div>
+
+            <!-- Username & Email Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wide">Username *</label>
+                    <div class="relative">
+                        <i class="fa-regular fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="text" name="username" placeholder="e.g. priya_s"
+                               class="w-full bg-gray-50 border-2 border-gray-200 focus:border-blinkit-green focus:bg-white rounded-2xl pl-11 pr-4 py-2.5 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wide">Email Address *</label>
+                    <div class="relative">
+                        <i class="fa-regular fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="email" name="email" required placeholder="name@example.com"
+                               class="w-full bg-gray-50 border-2 border-gray-200 focus:border-blinkit-green focus:bg-white rounded-2xl pl-11 pr-4 py-2.5 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phone Number -->
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wide">Phone Number *</label>
+                <div class="flex items-center rounded-2xl border-2 border-gray-200 focus-within:border-blinkit-green focus-within:ring-2 focus-within:ring-emerald-500/20 bg-gray-50 overflow-hidden transition-all">
+                    <span class="px-3.5 py-2.5 text-sm font-black text-gray-700 bg-gray-100/80 border-r border-gray-200 flex items-center gap-1 shrink-0">
+                        <span>🇮🇳</span>
+                        <span>+91</span>
+                    </span>
+                    <input type="tel" name="phone_number" required maxlength="10" placeholder="10-digit mobile number"
+                           class="w-full bg-transparent px-4 py-2.5 text-sm font-bold text-gray-900 focus:outline-none placeholder:font-normal placeholder:text-gray-400">
+                </div>
+            </div>
+
+            <!-- Password & Confirm Password Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wide">Password *</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="password" name="password" required placeholder="Min. 6 chars"
+                               class="w-full bg-gray-50 border-2 border-gray-200 focus:border-blinkit-green focus:bg-white rounded-2xl pl-11 pr-4 py-2.5 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wide">Confirm Password *</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-shield-check absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="password" name="confirm_password" required placeholder="Re-enter password"
+                               class="w-full bg-gray-50 border-2 border-gray-200 focus:border-blinkit-green focus:bg-white rounded-2xl pl-11 pr-4 py-2.5 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition">
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-blinkit-green hover:bg-blinkit-darkgreen text-white font-extrabold py-3.5 rounded-2xl transition text-sm shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer mt-2">
+                <i class="fa-solid fa-user-plus text-xs"></i>
+                <span>Create Account</span>
+            </button>
+        </form>
+
+        <!-- Link to Login -->
+        <div class="text-center text-xs text-gray-600 pt-2 border-t border-gray-100">
+            Already have an account? 
+            <a href="{% url 'accounts:login' %}{% if next %}?next={{ next }}{% endif %}" class="font-extrabold text-blinkit-green hover:underline ml-1">
+                Log In
+            </a>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

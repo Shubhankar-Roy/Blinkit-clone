@@ -1,0 +1,202 @@
+{% extends 'admin_custom/base_admin.html' %}
+
+{% block title %}Coupons & Offers - Blinkit Admin{% endblock %}
+{% block page_heading %}Promotions & Coupon Codes{% endblock %}
+
+{% block page_badge %}
+<span class="bg-indigo-100 text-indigo-800 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
+    {{ total_coupons }} Promo Codes
+</span>
+{% endblock %}
+
+{% block admin_content %}
+<div class="space-y-6">
+
+    <!-- KPI Metric Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Coupons</span>
+                <div class="w-8 h-8 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center">
+                    <i class="fa-solid fa-tags text-sm"></i>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="text-2xl font-black text-gray-900">{{ total_coupons }}</div>
+                <div class="text-[11px] font-bold text-purple-700 mt-1">Configured promo codes</div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Active Offers</span>
+                <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                    <i class="fa-solid fa-circle-check text-sm"></i>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="text-2xl font-black text-emerald-700">{{ active_coupons }}</div>
+                <div class="text-[11px] font-bold text-emerald-800 mt-1">Currently redeemable</div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Redemptions</span>
+                <div class="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
+                    <i class="fa-solid fa-receipt text-sm"></i>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="text-2xl font-black text-blue-700">{{ total_redemptions }}</div>
+                <div class="text-[11px] font-bold text-blue-800 mt-1">Customer redemptions</div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Expired / Closed</span>
+                <div class="w-8 h-8 rounded-xl bg-gray-100 text-gray-700 flex items-center justify-center">
+                    <i class="fa-solid fa-hourglass-end text-sm"></i>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="text-2xl font-black text-gray-700">{{ expired_coupons }}</div>
+                <div class="text-[11px] font-bold text-gray-500 mt-1">Past validity date</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Header Action Button Strip -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-lg font-black text-gray-900 tracking-tight">Active Promo Campaigns</h2>
+            <p class="text-xs text-gray-500 font-medium">Manage instant discounts, percentage offers, and minimum order criteria.</p>
+        </div>
+        <a href="{% url 'promotions_admin:create' %}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow-sm shadow-emerald-600/20">
+            <i class="fa-solid fa-plus"></i>
+            <span>Create Coupon</span>
+        </a>
+    </div>
+
+    <!-- Coupons Table -->
+    <div class="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead>
+                    <tr class="bg-gray-50 text-gray-500 font-bold uppercase tracking-wider border-b border-gray-200">
+                        <th class="py-4 px-6">Coupon Code & Description</th>
+                        <th class="py-4 px-6">Discount Type & Value</th>
+                        <th class="py-4 px-6">Min Order Criteria</th>
+                        <th class="py-4 px-6">Redemptions</th>
+                        <th class="py-4 px-6">Validity Window</th>
+                        <th class="py-4 px-6">Status</th>
+                        <th class="py-4 px-6 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 font-medium">
+                    {% for coupon in coupons %}
+                    <tr class="hover:bg-emerald-50/30 transition">
+                        
+                        <!-- Code & Summary -->
+                        <td class="py-4 px-6">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center font-black text-sm shrink-0 border border-purple-100">
+                                    <i class="fa-solid fa-tag"></i>
+                                </div>
+                                <div>
+                                    <span class="font-mono text-sm font-black text-gray-900 bg-slate-100 px-2 py-0.5 rounded">{{ coupon.code }}</span>
+                                    <div class="text-xs text-gray-500 font-medium mt-1 max-w-xs">{{ coupon.description }}</div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Discount Type -->
+                        <td class="py-4 px-6">
+                            {% if coupon.discount_type == 'FLAT' %}
+                            <div class="font-black text-gray-900 text-sm">Flat ₹{{ coupon.discount_value|floatformat:0 }} OFF</div>
+                            <div class="text-[10px] text-purple-700 font-bold">FLAT CASH DISCOUNT</div>
+                            {% else %}
+                            <div class="font-black text-gray-900 text-sm">{{ coupon.discount_value|floatformat:0 }}% OFF</div>
+                            <div class="text-[10px] text-blue-700 font-bold">{% if coupon.max_discount_amount %}Capped at ₹{{ coupon.max_discount_amount|floatformat:0 }}{% else %}No Cap{% endif %}</div>
+                            {% endif %}
+                        </td>
+
+                        <!-- Min Order -->
+                        <td class="py-4 px-6">
+                            <div class="font-extrabold text-gray-800">
+                                {% if coupon.min_order_amount > 0 %}
+                                ₹{{ coupon.min_order_amount|floatformat:0 }}
+                                {% else %}
+                                <span class="text-gray-400">No Minimum</span>
+                                {% endif %}
+                            </div>
+                            <div class="text-[10px] text-gray-400">Items Subtotal</div>
+                        </td>
+
+                        <!-- Redemptions / Usage Limit -->
+                        <td class="py-4 px-6">
+                            <div class="font-bold text-gray-900">{{ coupon.times_used }} / {{ coupon.usage_limit }}</div>
+                            <div class="w-24 bg-gray-100 rounded-full h-1.5 mt-1 overflow-hidden">
+                                <div class="bg-purple-600 h-full" style="width: {% widthratio coupon.times_used coupon.usage_limit 100 %}%;"></div>
+                            </div>
+                        </td>
+
+                        <!-- Validity -->
+                        <td class="py-4 px-6">
+                            <div class="text-gray-700 font-bold">{{ coupon.valid_until|date:"M d, Y" }}</div>
+                            <div class="text-[10px] text-gray-400">Expires 11:59 PM</div>
+                        </td>
+
+                        <!-- Status Toggle -->
+                        <td class="py-4 px-6">
+                            <a href="{% url 'promotions_admin:toggle' coupon_id=coupon.id %}" 
+                               title="Click to toggle status"
+                               class="inline-flex items-center gap-1.5 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider transition {% if coupon.is_active %}bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100{% else %}bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200{% endif %}">
+                                <span class="w-1.5 h-1.5 rounded-full {% if coupon.is_active %}bg-emerald-600{% else %}bg-gray-400{% endif %}"></span>
+                                <span>{% if coupon.is_active %}Active{% else %}Inactive{% endif %}</span>
+                            </a>
+                        </td>
+
+                        <!-- Actions -->
+                        <td class="py-4 px-6 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <a href="{% url 'promotions_admin:edit' coupon_id=coupon.id %}" 
+                                   class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs p-2 rounded-xl transition"
+                                   title="Edit Coupon">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+                                <form action="{% url 'promotions_admin:delete' coupon_id=coupon.id %}" method="POST" class="inline" onsubmit="return confirm('Delete coupon {{ coupon.code }}?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs p-2 rounded-xl transition cursor-pointer" title="Delete Coupon">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="py-12 text-center text-gray-400">
+                            <div class="w-16 h-16 rounded-3xl bg-gray-100 flex items-center justify-center mx-auto mb-3 text-gray-400 text-2xl">
+                                <i class="fa-solid fa-ticket"></i>
+                            </div>
+                            <div class="text-sm font-bold text-gray-700">No promo coupons found.</div>
+                            <div class="mt-4">
+                                <a href="{% url 'promotions_admin:create' %}" class="bg-emerald-600 text-white text-xs font-extrabold px-4 py-2 rounded-xl">
+                                    Create First Coupon
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
