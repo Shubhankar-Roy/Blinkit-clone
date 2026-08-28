@@ -2,12 +2,19 @@
 WSGI config for blinkitproject project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/6.1/howto/deployment/wsgi/
 """
 
 import os
+import sys
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
+
+local_site_packages = BASE_DIR / 'myserver' / 'Lib' / 'site-packages'
+if local_site_packages.exists() and str(local_site_packages) not in sys.path:
+    sys.path.insert(1, str(local_site_packages))
 
 from django.core.wsgi import get_wsgi_application
 

@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'blinkitapps.darkstore',
     'blinkitapps.promotions',
     'blinkitapps.orders',
+    'blinkitapps.payment',
 ]
 
 MIDDLEWARE = [
@@ -56,8 +57,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'blinkitapps.darkstore.context_processors.location_processor',
-                'blinkitapps.cart.context_processors.cart_processor',
             ],
         },
     },
@@ -110,7 +109,10 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # Razorpay Payment Gateway Settings
-RAZORPAY_KEY_ID = 'rzp_test_blinkitCloneKey123'
-RAZORPAY_KEY_SECRET = 'mock_secret_blinkit456'
+RAZORPAY_KEY_ID = 'rzp_test_TUqVvgf1HYHy0o'
+RAZORPAY_KEY_SECRET = 'kmQ1hgcEvRaL6k6ZZ4Dw8MG3'
+RAZOR_KEY_ID = RAZORPAY_KEY_ID
+RAZOR_KEY_SECRET = RAZORPAY_KEY_SECRET
+
 
 

@@ -9,7 +9,7 @@
     <div class="bg-gradient-to-r from-[#0C831F] via-[#0b741c] to-[#044c10] rounded-3xl p-6 sm:p-10 text-white flex flex-col md:flex-row items-center justify-between shadow-xl relative overflow-hidden">
         <div class="space-y-3 z-10 max-w-xl">
             <span class="inline-flex items-center gap-1.5 bg-blinkit-yellow text-gray-950 font-black text-xs px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
-                <i class="fa-solid fa-bolt text-xs text-emerald-900"></i> Delivery in {{ eta_mins|default:10 }} Minutes
+                <i class="fa-solid fa-bolt text-xs text-emerald-900"></i> Delivery in {{ request.session.eta_mins|default:10 }} Minutes
             </span>
             <h1 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight">
                 India's Last Minute App
@@ -23,7 +23,7 @@
                 </a>
                 <label for="location-modal-toggle" class="cursor-pointer bg-emerald-800/80 hover:bg-emerald-900 text-emerald-100 font-bold px-4 py-3 rounded-xl text-xs transition flex items-center gap-1.5 border border-emerald-600/50">
                     <i class="fa-solid fa-location-dot"></i>
-                    <span>{{ current_location_name|default:'Koramangala, Bengaluru' }}</span>
+                    <span>{{ request.session.location_name|default:'Koramangala, Bengaluru' }}</span>
                 </label>
             </div>
         </div>
@@ -85,7 +85,7 @@
         <div class="flex items-center justify-between mb-4">
             <div>
                 <h2 class="text-xl md:text-2xl font-black text-gray-900 flex items-center gap-2">
-                    <span>🔥 Trending in {{ current_location_name|default:'Bengaluru' }}</span>
+                    <span>🔥 Trending in {{ request.session.location_name|default:'Bengaluru' }}</span>
                 </h2>
                 <p class="text-xs text-gray-500">Most ordered items right now</p>
             </div>

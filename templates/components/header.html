@@ -10,11 +10,11 @@
         <label for="location-modal-toggle" class="border-l border-gray-200 pl-3 md:pl-5 py-1 text-left shrink-0 cursor-pointer group hover:opacity-90 transition">
             <div class="text-[13px] font-black text-gray-900 flex items-center gap-1.5">
                 <i class="fa-solid fa-bolt text-blinkit-green group-hover:scale-110 transition-transform"></i>
-                <span>Delivery in {{ eta_mins|default:10 }} minutes</span>
+                <span>Delivery in {{ request.session.eta_mins|default:10 }} minutes</span>
             </div>
             <div class="text-xs text-gray-600 flex items-center gap-1 font-medium group-hover:text-blinkit-green transition-colors">
                 <i class="fa-solid fa-location-dot text-blinkit-green text-xs"></i>
-                <span class="max-w-[140px] md:max-w-[200px] truncate">{{ current_location_name|default:'Koramangala, Bengaluru' }}</span>
+                <span class="max-w-[140px] md:max-w-[200px] truncate">{{ request.session.location_name|default:'Koramangala, Bengaluru' }}</span>
                 <i class="fa-solid fa-chevron-down text-[10px] text-gray-400 group-hover:text-blinkit-green ml-0.5"></i>
             </div>
         </label>

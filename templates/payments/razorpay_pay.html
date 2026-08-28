@@ -4,9 +4,8 @@
 
 {% block content %}
 <div class="max-w-xl mx-auto px-4 py-12">
-    
     <div class="bg-white rounded-3xl border border-gray-200 p-8 shadow-xl space-y-6 text-center">
-        
+
         <!-- Razorpay Header Badge -->
         <div class="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-3xl mx-auto shadow-inner">
             <i class="fa-solid fa-credit-card"></i>
@@ -36,27 +35,49 @@
             </div>
         </div>
 
-        <!-- Payment Actions / Razorpay Simulator -->
+        <!-- Real Razorpay Launch Button -->
         <div class="space-y-3 pt-2">
-            <form action="{% url 'orders:payment_verify' %}" method="POST">
-                {% csrf_token %}
-                <input type="hidden" name="order_number" value="{{ order.order_number }}">
-                <input type="hidden" name="payment_status" value="SUCCESS">
-                <input type="hidden" name="razorpay_payment_id" value="pay_mock_{{ order.order_number }}">
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-2xl transition shadow-lg shadow-blue-600/30 text-sm flex items-center justify-center gap-2 cursor-pointer">
-                    <i class="fa-solid fa-lock"></i>
-                    <span>Simulate Successful Payment (₹{{ order.grand_total|floatformat:0 }})</span>
-                </button>
-            </form>
+            <button type="button" 
+                    id="rzp-button-main"
+                    onclick="payWithRazorpay()"
+                    class="w-full bg-[#0C831F] hover:bg-[#096e1a] text-white font-black py-4 rounded-2xl transition shadow-lg text-sm flex items-center justify-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-lock"></i>
+                <span>Pay ₹{{ order.grand_total|floatformat:0 }} with Razorpay</span>
+            </button>
 
-            <form action="{% url 'orders:payment_verify' %}" method="POST">
+            <!-- Test Simulator Controls -->
+            <div class="pt-2 border-t border-gray-100 grid grid-cols-2 gap-2">
+                <form action="/paymenthandler/" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="order_number" value="{{ order.order_number }}">
+                    <input type="hidden" name="payment_status" value="SUCCESS">
+                    <input type="hidden" name="razorpay_order_id" value="{{ razorpay_order_id }}">
+                    <input type="hidden" name="razorpay_payment_id" value="pay_mock_{{ order.order_number }}">
+                    <input type="hidden" name="razorpay_signature" value="sig_mock_{{ order.order_number }}">
+                    <button type="submit" class="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold py-2.5 rounded-xl transition text-xs border border-emerald-200 flex items-center justify-center gap-1 cursor-pointer">
+                        <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                        <span>Simulate Success</span>
+                    </button>
+                </form>
+
+                <form action="/paymenthandler/" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="order_number" value="{{ order.order_number }}">
+                    <input type="hidden" name="payment_status" value="FAILED">
+                    <button type="submit" class="w-full bg-red-50 hover:bg-red-100 text-red-800 font-bold py-2.5 rounded-xl transition text-xs border border-red-200 flex items-center justify-center gap-1 cursor-pointer">
+                        <i class="fa-solid fa-circle-xmark text-red-600"></i>
+                        <span>Simulate Failed</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Hidden Form for Razorpay JS callback -->
+            <form id="rzp-callback-form" action="/paymenthandler/" method="POST" class="hidden">
                 {% csrf_token %}
                 <input type="hidden" name="order_number" value="{{ order.order_number }}">
-                <input type="hidden" name="payment_status" value="FAILED">
-                <button type="submit" class="w-full bg-gray-100 hover:bg-red-50 text-gray-600 hover:text-red-700 font-bold py-3 rounded-2xl transition text-xs flex items-center justify-center gap-2 cursor-pointer">
-                    <i class="fa-solid fa-xmark"></i>
-                    <span>Cancel / Simulate Failed Payment</span>
-                </button>
+                <input type="hidden" name="razorpay_order_id" id="rzp_cb_order_id" value="{{ razorpay_order_id }}">
+                <input type="hidden" name="razorpay_payment_id" id="rzp_cb_payment_id">
+                <input type="hidden" name="razorpay_signature" id="rzp_cb_signature">
             </form>
         </div>
 
@@ -66,6 +87,39 @@
         </div>
 
     </div>
-
 </div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+function payWithRazorpay() {
+    var options = {
+        "key": "{{ razorpay_merchant_key|default:razorpay_key_id }}",
+        "amount": "{{ amount_in_paise }}",
+        "currency": "INR",
+        "name": "Blinkit Quick Commerce",
+        "description": "Order #{{ order.order_number }}",
+        "order_id": "{{ razorpay_order_id }}",
+        "handler": function (response){
+            document.getElementById('rzp_cb_payment_id').value = response.razorpay_payment_id;
+            document.getElementById('rzp_cb_order_id').value = response.razorpay_order_id || "{{ razorpay_order_id }}";
+            document.getElementById('rzp_cb_signature').value = response.razorpay_signature;
+            document.getElementById('rzp-callback-form').submit();
+        },
+        "prefill": {
+            "name": "{{ user_name|default:'Customer' }}",
+            "email": "{{ user_email|default:'customer@blinkitclone.local' }}",
+            "contact": "{{ user_phone|default:'9876543210' }}"
+        },
+        "theme": {
+            "color": "#0C831F"
+        }
+    };
+    try {
+        var rzp = new Razorpay(options);
+        rzp.open();
+    } catch(err) {
+        console.warn("Razorpay standard modal error", err);
+    }
+}
+</script>
 {% endblock %}

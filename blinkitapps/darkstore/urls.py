@@ -5,6 +5,8 @@ app_name = 'darkstore'
 
 urlpatterns = [
     path('set-location/', views.set_location_view, name='set_location'),
+    path('api/detect-location/', views.detect_location_api, name='detect_location_api'),
+    path('api/search-locations/', views.search_locations_api, name='search_locations_api'),
     path('api/check-pincode/', views.check_pincode_api, name='check_pincode_api'),
     path('api/popular-locations/', views.get_popular_locations_api, name='popular_locations_api'),
 ]

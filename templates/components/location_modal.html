@@ -1,15 +1,15 @@
-<!-- Location Selection Modal (Pure Tailwind CSS + Fast Interactive Helper) -->
+<!-- Location Selection Modal (High Accuracy GPS + Live Locality Search) -->
 <input type="checkbox" id="location-modal-toggle" class="peer hidden">
 
-<div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none peer-checked:opacity-100 peer-checked:pointer-events-auto transition-opacity duration-300 flex items-center justify-center p-4">
+<div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none peer-checked:opacity-100 peer-checked:pointer-events-auto transition-opacity duration-300 flex items-center justify-center p-3 sm:p-4">
     <!-- Click outside backdrop to close -->
     <label for="location-modal-toggle" class="absolute inset-0 cursor-pointer"></label>
 
     <!-- Modal Box -->
-    <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden z-10 transform scale-95 peer-checked:scale-100 transition-transform duration-300">
+    <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto z-10 transform scale-95 peer-checked:scale-100 transition-transform duration-300">
         
         <!-- Modal Header -->
-        <div class="bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-800 text-white p-6 relative">
+        <div class="bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-800 text-white p-5 sm:p-6 relative sticky top-0 z-20">
             <label for="location-modal-toggle" class="absolute top-5 right-5 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full w-8 h-8 flex items-center justify-center cursor-pointer transition">
                 <i class="fa-solid fa-xmark text-base"></i>
             </label>
@@ -17,138 +17,378 @@
                 <i class="fa-solid fa-bolt text-yellow-300"></i>
                 <span>Instant 10-Minute Delivery</span>
             </div>
-            <h2 class="text-2xl font-black tracking-tight">Select Delivery Location</h2>
-            <p class="text-xs text-emerald-100/90 mt-1">Dark Store micro-hubs ensure lightning fast delivery to your doorstep.</p>
+            <h2 class="text-xl sm:text-2xl font-black tracking-tight">Select Delivery Location</h2>
+            <p class="text-xs text-emerald-100/90 mt-1">Accurate location ensures closest dark-store fulfillment and lightning-fast delivery.</p>
         </div>
 
         <!-- Modal Body -->
-        <div class="p-6 space-y-5">
+        <div class="p-5 sm:p-6 space-y-4">
             
             <!-- Current Detected Location Banner -->
-            <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 flex items-center justify-between">
+            <div class="bg-emerald-50/80 border border-emerald-200/80 rounded-2xl p-3.5 flex items-center justify-between shadow-xs">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-sm">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-sm shrink-0">
                         <i class="fa-solid fa-location-dot text-lg"></i>
                     </div>
-                    <div>
-                        <div class="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Current Serving Hub</div>
-                        <div class="text-sm font-extrabold text-gray-900">{{ current_location_name|default:'Koramangala, Bengaluru' }}</div>
-                        <div class="text-xs text-gray-500 font-medium">Pincode: <span class="font-bold text-gray-800">{{ current_pincode|default:'560034' }}</span> • ETA: <span class="font-bold text-emerald-700">{{ eta_mins|default:10 }} Mins</span></div>
+                    <div class="min-w-0">
+                        <div class="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider">Current Serving Location</div>
+                        <div class="text-sm font-black text-gray-900 truncate">
+                            {{ request.session.location_name|default:'Koramangala, Bengaluru' }}
+                        </div>
+                        <div class="text-xs text-gray-500 font-medium">
+                            Pincode: <span class="font-bold text-gray-800">{{ request.session.pincode|default:'560034' }}</span> • 
+                            ETA: <span class="font-bold text-emerald-700">{{ request.session.eta_mins|default:10 }} Mins</span>
+                        </div>
                     </div>
                 </div>
-                <span class="bg-emerald-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
+                <span class="bg-emerald-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shrink-0 ml-2">
                     Active
                 </span>
             </div>
 
-            <!-- Pincode / Locality Form -->
-            <form action="{% url 'darkstore:set_location' %}" method="POST" class="space-y-4" id="location-select-form">
+            <!-- GPS Auto-Detect Button (High Accuracy) -->
+            <button type="button" 
+                    id="gps-detect-btn"
+                    onclick="detectAccurateGPSLocation()"
+                    class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-extrabold py-3 px-4 rounded-2xl transition flex items-center justify-center gap-2 text-sm shadow-md shadow-emerald-600/20 group">
+                <i class="fa-solid fa-crosshairs group-hover:rotate-45 transition-transform"></i>
+                <span id="gps-btn-text">Detect My Exact Current Location</span>
+            </button>
+
+            <!-- Live Status Feedback Container -->
+            <div id="serviceability-feedback" class="hidden text-xs p-3.5 rounded-2xl font-semibold flex items-start gap-2.5 transition"></div>
+
+            <!-- Search Area / Locality / Landmark Autocomplete -->
+            <div class="relative">
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                    Search Area, Locality or Landmark
+                </label>
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="text" 
+                           id="locality-search-input"
+                           placeholder="Type area e.g. Indiranagar, HSR Layout, MG Road..." 
+                           autocomplete="off"
+                           class="w-full bg-[#F4F6FB] text-sm font-semibold rounded-2xl pl-10 pr-4 py-3 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition">
+                </div>
+
+                <!-- Autocomplete Dropdown List -->
+                <div id="search-suggestions" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden z-30 max-h-56 overflow-y-auto divide-y divide-gray-100">
+                </div>
+            </div>
+
+            <!-- Manual Pincode & Locality Form -->
+            <form action="{% url 'darkstore:set_location' %}" method="POST" class="space-y-3 pt-1 border-t border-gray-100" id="location-select-form">
                 {% csrf_token %}
-                
+                <input type="hidden" name="location_name" id="modal-location-name-input" value="{{ request.session.location_name|default:'Koramangala, Bengaluru' }}">
+                <input type="hidden" name="lat" id="modal-lat-input" value="{{ request.session.user_lat|default:'' }}">
+                <input type="hidden" name="lng" id="modal-lng-input" value="{{ request.session.user_lng|default:'' }}">
+                <input type="hidden" name="eta_mins" id="modal-eta-input" value="{{ request.session.eta_mins|default:10 }}">
+
                 <div>
-                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
-                        Enter Delivery Pincode
+                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                        Or Enter 6-digit Pincode
                     </label>
                     <div class="relative">
-                        <i class="fa-solid fa-map-pin absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <i class="fa-solid fa-map-pin absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
                         <input type="text" 
                                name="pincode" 
                                id="modal-pincode-input"
-                               value="{{ current_pincode|default:'' }}" 
+                               value="{{ request.session.pincode|default:'' }}" 
                                maxlength="6"
-                               placeholder="Enter 6-digit Pincode (e.g. 560034)" 
+                               placeholder="e.g. 560034" 
                                required
-                               class="w-full bg-[#F4F6FB] text-sm font-semibold rounded-2xl pl-11 pr-24 py-3.5 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition">
+                               class="w-full bg-[#F4F6FB] text-sm font-semibold rounded-2xl pl-10 pr-20 py-3 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition">
                         
-                        <button type="button" 
-                                onclick="detectCurrentLocation()"
-                                class="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-extrabold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 px-3 py-1.5 rounded-xl transition flex items-center gap-1">
-                            <i class="fa-solid fa-crosshairs text-xs"></i>
-                            <span>Detect</span>
-                        </button>
-                    </div>
-                    <input type="hidden" name="location_name" id="modal-location-name-input" value="{{ current_location_name|default:'' }}">
-                </div>
-
-                <!-- Serviceability Feedback Result Container -->
-                <div id="serviceability-feedback" class="hidden text-xs p-3 rounded-xl font-semibold flex items-center gap-2"></div>
-
-                <!-- Popular Localities Quick Pick -->
-                <div>
-                    <div class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-2.5 flex items-center justify-between">
-                        <span>Popular Hubs in Bengaluru</span>
-                        <span class="text-[10px] text-gray-400 font-semibold">1-Click Switch</span>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2">
-                        <button type="button" onclick="selectPresetLocation('560034', 'Koramangala, Bengaluru')"
-                                class="text-left p-2.5 rounded-xl border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50/50 transition group flex flex-col justify-between">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-bold text-gray-900 group-hover:text-emerald-700">Koramangala</span>
-                                <span class="text-[9px] font-black bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">8 MINS</span>
-                            </div>
-                            <span class="text-[11px] text-gray-500 font-medium">560034 (Hub #01)</span>
-                        </button>
-
-                        <button type="button" onclick="selectPresetLocation('560038', 'Indiranagar, Bengaluru')"
-                                class="text-left p-2.5 rounded-xl border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50/50 transition group flex flex-col justify-between">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-bold text-gray-900 group-hover:text-emerald-700">Indiranagar</span>
-                                <span class="text-[9px] font-black bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">9 MINS</span>
-                            </div>
-                            <span class="text-[11px] text-gray-500 font-medium">560038 (Hub #02)</span>
-                        </button>
-
-                        <button type="button" onclick="selectPresetLocation('560102', 'HSR Layout, Bengaluru')"
-                                class="text-left p-2.5 rounded-xl border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50/50 transition group flex flex-col justify-between">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-bold text-gray-900 group-hover:text-emerald-700">HSR Layout</span>
-                                <span class="text-[9px] font-black bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">10 MINS</span>
-                            </div>
-                            <span class="text-[11px] text-gray-500 font-medium">560102 (Hub #03)</span>
-                        </button>
-
-                        <button type="button" onclick="selectPresetLocation('560066', 'Whitefield, Bengaluru')"
-                                class="text-left p-2.5 rounded-xl border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50/50 transition group flex flex-col justify-between">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-bold text-gray-900 group-hover:text-emerald-700">Whitefield</span>
-                                <span class="text-[9px] font-black bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">12 MINS</span>
-                            </div>
-                            <span class="text-[11px] text-gray-500 font-medium">560066 (Hub #04)</span>
+                        <button type="button"
+                                onclick="verifyPincode()"
+                                class="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-100 hover:bg-emerald-200 px-2.5 py-1.5 rounded-xl transition">
+                            Verify
                         </button>
                     </div>
                 </div>
 
                 <!-- Submit Button -->
                 <button type="submit" 
-                        class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 rounded-2xl shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2 text-sm">
-                    <i class="fa-solid fa-check"></i>
+                        class="w-full bg-gray-900 hover:bg-black text-white font-extrabold py-3.5 rounded-2xl shadow-md transition flex items-center justify-center gap-2 text-sm">
+                    <i class="fa-solid fa-check text-emerald-400"></i>
                     <span>Confirm & Explore Catalog</span>
                 </button>
             </form>
+
+            <!-- Popular Localities Quick Pick -->
+            <div class="pt-2">
+                <div class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 flex items-center justify-between">
+                    <span>Popular Bengaluru Hubs</span>
+                    <span class="text-[10px] text-gray-400 font-semibold">1-Click Quick Select</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" onclick="selectPresetLocation('560034', 'Koramangala, Bengaluru', 12.9352, 77.6245, 8)"
+                            class="text-left p-2.5 rounded-xl border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50/50 transition group flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-gray-900 group-hover:text-emerald-700">Koramangala</span>
+                            <span class="text-[9px] font-black bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">8 MINS</span>
+                        </div>
+                        <span class="text-[11px] text-gray-500 font-medium">560034 (Hub #01)</span>
+                    </button>
+
+                    <button type="button" onclick="selectPresetLocation('560038', 'Indiranagar, Bengaluru', 12.9719, 77.6412, 9)"
+                            class="text-left p-2.5 rounded-xl border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50/50 transition group flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-gray-900 group-hover:text-emerald-700">Indiranagar</span>
+                            <span class="text-[9px] font-black bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">9 MINS</span>
+                        </div>
+                        <span class="text-[11px] text-gray-500 font-medium">560038 (Hub #02)</span>
+                    </button>
+
+                    <button type="button" onclick="selectPresetLocation('560102', 'HSR Layout, Bengaluru', 12.9121, 77.6446, 10)"
+                            class="text-left p-2.5 rounded-xl border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50/50 transition group flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-gray-900 group-hover:text-emerald-700">HSR Layout</span>
+                            <span class="text-[9px] font-black bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">10 MINS</span>
+                        </div>
+                        <span class="text-[11px] text-gray-500 font-medium">560102 (Hub #03)</span>
+                    </button>
+
+                    <button type="button" onclick="selectPresetLocation('560066', 'Whitefield, Bengaluru', 12.9698, 77.7500, 12)"
+                            class="text-left p-2.5 rounded-xl border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50/50 transition group flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-gray-900 group-hover:text-emerald-700">Whitefield</span>
+                            <span class="text-[9px] font-black bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">12 MINS</span>
+                        </div>
+                        <span class="text-[11px] text-gray-500 font-medium">560066 (Hub #04)</span>
+                    </button>
+                </div>
+            </div>
 
         </div>
     </div>
 </div>
 
 <script>
-function selectPresetLocation(pincode, name) {
+// Select preset quick-pick hub
+function selectPresetLocation(pincode, name, lat, lng, eta) {
     document.getElementById('modal-pincode-input').value = pincode;
     document.getElementById('modal-location-name-input').value = name;
+    if (lat) document.getElementById('modal-lat-input').value = lat;
+    if (lng) document.getElementById('modal-lng-input').value = lng;
+    if (eta) document.getElementById('modal-eta-input').value = eta;
     document.getElementById('location-select-form').submit();
 }
 
-function detectCurrentLocation() {
+// Live feedback display helper
+function setLocationFeedback(type, htmlContent) {
     const feedback = document.getElementById('serviceability-feedback');
-    feedback.className = "text-xs p-3 rounded-xl font-semibold flex items-center gap-2 bg-blue-50 text-blue-700 border border-blue-200";
-    feedback.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Detecting your locality...';
     feedback.classList.remove('hidden');
+    
+    if (type === 'loading') {
+        feedback.className = "text-xs p-3.5 rounded-2xl font-semibold flex items-center gap-2.5 bg-blue-50 text-blue-800 border border-blue-200 animate-pulse";
+    } else if (type === 'success') {
+        feedback.className = "text-xs p-3.5 rounded-2xl font-semibold flex items-start gap-2.5 bg-emerald-50 text-emerald-800 border border-emerald-200";
+    } else if (type === 'warning') {
+        feedback.className = "text-xs p-3.5 rounded-2xl font-semibold flex items-start gap-2.5 bg-amber-50 text-amber-800 border border-amber-200";
+    } else {
+        feedback.className = "text-xs p-3.5 rounded-2xl font-semibold flex items-start gap-2.5 bg-red-50 text-red-800 border border-red-200";
+    }
+    feedback.innerHTML = htmlContent;
+}
 
-    setTimeout(() => {
-        document.getElementById('modal-pincode-input').value = "560034";
-        document.getElementById('modal-location-name-input').value = "Koramangala 4th Block, Bengaluru";
-        feedback.className = "text-xs p-3 rounded-xl font-semibold flex items-center gap-2 bg-emerald-50 text-emerald-800 border border-emerald-200";
-        feedback.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600"></i> Assigned to Koramangala Hub #01 (ETA: 8 mins)';
-    }, 600);
+// 1. High-Accuracy GPS Geolocation & Reverse Geocoding
+function detectAccurateGPSLocation() {
+    const btn = document.getElementById('gps-detect-btn');
+    const btnText = document.getElementById('gps-btn-text');
+    
+    if (!navigator.geolocation) {
+        setLocationFeedback('error', '<i class="fa-solid fa-triangle-exclamation text-base text-red-500"></i><div>Geolocation is not supported by your browser. Please search or enter your pincode manually.</div>');
+        return;
+    }
+
+    btn.disabled = true;
+    btnText.textContent = "Acquiring GPS location...";
+    setLocationFeedback('loading', '<i class="fa-solid fa-spinner fa-spin text-base text-blue-600"></i><div>Requesting high-accuracy GPS coordinates from device...</div>');
+
+    navigator.geolocation.getCurrentPosition(
+        async function(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const accuracy = Math.round(position.coords.accuracy || 10);
+
+            setLocationFeedback('loading', `<i class="fa-solid fa-spinner fa-spin text-base text-blue-600"></i><div>GPS coordinates acquired (±${accuracy}m). Reverse geocoding address & nearest Dark Store...</div>`);
+
+            try {
+                const response = await fetch(`/location/api/detect-location/?lat=${lat}&lng=${lng}`);
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    document.getElementById('modal-pincode-input').value = data.pincode;
+                    document.getElementById('modal-location-name-input').value = data.location_name;
+                    document.getElementById('modal-lat-input').value = data.latitude;
+                    document.getElementById('modal-lng-input').value = data.longitude;
+                    document.getElementById('modal-eta-input').value = data.eta_mins;
+
+                    const icon = data.serviceable ? 'fa-circle-check text-emerald-600' : 'fa-circle-info text-amber-600';
+                    const feedbackType = data.serviceable ? 'success' : 'warning';
+
+                    setLocationFeedback(feedbackType, `
+                        <i class="fa-solid ${icon} text-base shrink-0 mt-0.5"></i>
+                        <div>
+                            <div class="font-extrabold text-sm">${data.location_name}</div>
+                            <div class="text-[11px] opacity-90 mt-0.5">Pincode: <b>${data.pincode}</b> • ETA: <b>${data.eta_mins} Mins</b> • Distance: <b>${data.distance_km} km</b></div>
+                            <div class="text-[11px] mt-1 font-bold">${data.message}</div>
+                        </div>
+                    `);
+
+                    btnText.textContent = "Location Detected! Submit to confirm";
+                } else {
+                    throw new Error(data.message || "Failed to resolve locality");
+                }
+            } catch (err) {
+                console.error("Geocoding error:", err);
+                setLocationFeedback('warning', '<i class="fa-solid fa-circle-exclamation text-base text-amber-600"></i><div>Could not reverse-geocode exact street, but coordinates were saved. Please confirm pincode.</div>');
+                document.getElementById('modal-lat-input').value = lat;
+                document.getElementById('modal-lng-input').value = lng;
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = "Re-detect Current Location";
+            }
+        },
+        function(error) {
+            btn.disabled = false;
+            btnText.textContent = "Detect My Exact Current Location";
+            let msg = "Could not access GPS.";
+            if (error.code === error.PERMISSION_DENIED) {
+                msg = "Location permission was denied. Please allow location access in your browser or search your locality above.";
+            } else if (error.code === error.POSITION_UNAVAILABLE) {
+                msg = "GPS location is currently unavailable. Please enter your pincode or area name.";
+            } else if (error.code === error.TIMEOUT) {
+                msg = "GPS request timed out. Please retry or enter your pincode manually.";
+            }
+            setLocationFeedback('error', `<i class="fa-solid fa-location-crosshairs text-base text-red-500"></i><div>${msg}</div>`);
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+    );
+}
+
+// 2. Real-time Locality Search Autocomplete
+let searchDebounceTimer = null;
+const localityInput = document.getElementById('locality-search-input');
+const suggestionsBox = document.getElementById('search-suggestions');
+
+if (localityInput) {
+    localityInput.addEventListener('input', function() {
+        const query = this.value.trim();
+        clearTimeout(searchDebounceTimer);
+
+        if (query.length < 2) {
+            suggestionsBox.classList.add('hidden');
+            suggestionsBox.innerHTML = '';
+            return;
+        }
+
+        searchDebounceTimer = setTimeout(async () => {
+            try {
+                const res = await fetch(`/location/api/search-locations/?q=${encodeURIComponent(query)}`);
+                const data = await res.json();
+                
+                if (data.status === 'success' && data.results.length > 0) {
+                    suggestionsBox.innerHTML = data.results.map(item => `
+                        <button type="button" 
+                                onclick="applySearchedLocation('${item.pincode}', '${item.name.replace(/'/g, "\\'")}', ${item.lat || 0}, ${item.lng || 0}, ${item.eta_mins || 10})"
+                                class="w-full text-left p-3 hover:bg-emerald-50 transition flex items-center justify-between group">
+                            <div class="min-w-0 pr-2">
+                                <div class="text-xs font-extrabold text-gray-900 group-hover:text-emerald-700 truncate">${item.name}</div>
+                                <div class="text-[11px] text-gray-500 font-medium">${item.city || 'India'} • Pincode: <b>${item.pincode}</b></div>
+                            </div>
+                            <span class="text-[10px] font-black bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full shrink-0">
+                                ${item.eta_mins || 10} MINS
+                            </span>
+                        </button>
+                    `).join('');
+                    suggestionsBox.classList.remove('hidden');
+                } else {
+                    suggestionsBox.innerHTML = `
+                        <div class="p-3 text-xs text-gray-500 text-center font-medium">
+                            No locations matched "${query}". Enter 6-digit pincode below.
+                        </div>
+                    `;
+                    suggestionsBox.classList.remove('hidden');
+                }
+            } catch (err) {
+                console.error("Search error:", err);
+            }
+        }, 250);
+    });
+
+    // Close suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!localityInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+            suggestionsBox.classList.add('hidden');
+        }
+    });
+}
+
+function applySearchedLocation(pincode, name, lat, lng, eta) {
+    document.getElementById('modal-pincode-input').value = pincode;
+    document.getElementById('modal-location-name-input').value = name;
+    if (lat) document.getElementById('modal-lat-input').value = lat;
+    if (lng) document.getElementById('modal-lng-input').value = lng;
+    if (eta) document.getElementById('modal-eta-input').value = eta;
+    suggestionsBox.classList.add('hidden');
+    if (localityInput) localityInput.value = name;
+
+    setLocationFeedback('success', `
+        <i class="fa-solid fa-circle-check text-base text-emerald-600 shrink-0"></i>
+        <div>
+            <div class="font-extrabold text-sm">${name}</div>
+            <div class="text-[11px] opacity-90 mt-0.5">Pincode: <b>${pincode}</b> • ETA: <b>${eta} Mins</b></div>
+        </div>
+    `);
+}
+
+// 3. Pincode Input Verification
+async function verifyPincode() {
+    const pin = document.getElementById('modal-pincode-input').value.trim();
+    if (pin.length !== 6) {
+        setLocationFeedback('warning', '<i class="fa-solid fa-circle-exclamation text-base text-amber-600"></i><div>Please enter a valid 6-digit Indian pincode.</div>');
+        return;
+    }
+
+    setLocationFeedback('loading', '<i class="fa-solid fa-spinner fa-spin text-base text-blue-600"></i><div>Checking serviceability for ' + pin + '...</div>');
+
+    try {
+        const res = await fetch(`/location/api/check-pincode/?pincode=${pin}`);
+        const data = await res.json();
+        
+        if (data.status === 'success') {
+            document.getElementById('modal-eta-input').value = data.eta_mins;
+            const currentName = document.getElementById('modal-location-name-input').value;
+            if (!currentName || currentName.includes('Koramangala')) {
+                document.getElementById('modal-location-name-input').value = data.store_name ? `${data.store_name.split('#')[0].strip || data.store_name}, Bengaluru` : `Pincode ${pin}`;
+            }
+
+            if (data.serviceable) {
+                setLocationFeedback('success', `<i class="fa-solid fa-circle-check text-base text-emerald-600 shrink-0"></i><div><b>${data.store_name}</b> covers pincode ${pin}! Superfast delivery in <b>${data.eta_mins} mins</b>.</div>`);
+            } else {
+                setLocationFeedback('warning', `<i class="fa-solid fa-circle-info text-base text-amber-600 shrink-0"></i><div>${data.message}</div>`);
+            }
+        }
+    } catch (e) {
+        console.error("Pincode check error:", e);
+    }
+}
+
+// Auto verify pincode on 6 digits entered
+const pincodeInputEl = document.getElementById('modal-pincode-input');
+if (pincodeInputEl) {
+    pincodeInputEl.addEventListener('input', function() {
+        if (this.value.trim().length === 6) {
+            verifyPincode();
+        }
+    });
 }
 </script>

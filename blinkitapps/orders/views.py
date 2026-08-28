@@ -12,7 +12,9 @@ from blinkitapps.accounts.models import Address
 from blinkitapps.cart.models import Cart, CartItem
 from blinkitapps.darkstore.models import DarkStore, DarkStoreInventory
 from blinkitapps.promotions.models import Coupon
+from blinkitapps.payment.models import Payment
 from .models import Order, OrderItem
+import razorpay
 
 
 def _get_user_cart(request):
@@ -162,16 +164,45 @@ def checkout_view(request):
 
         # Route according to payment method
         if payment_method == 'RAZORPAY':
-            razorpay_key = getattr(settings, 'RAZORPAY_KEY_ID', 'rzp_test_blinkitCloneKey123')
-            razorpay_order_id = f"order_{uuid.uuid4().hex[:14]}"
+            razorpay_key = getattr(settings, 'RAZOR_KEY_ID', getattr(settings, 'RAZORPAY_KEY_ID', 'rzp_test_TUqVvgf1HYHy0o'))
+            razorpay_secret = getattr(settings, 'RAZOR_KEY_SECRET', getattr(settings, 'RAZORPAY_KEY_SECRET', 'kmQ1hgcEvRaL6k6ZZ4Dw8MG3'))
+            amount_in_paise = int(order.grand_total * 100)
+
+            try:
+                client = razorpay.Client(auth=(razorpay_key, razorpay_secret))
+                rzp_order = client.order.create(
+                    dict(
+                        amount=amount_in_paise,
+                        currency='INR',
+                        receipt=str(order.order_number),
+                        payment_capture='0',
+                        notes={'order_number': order.order_number}
+                    )
+                )
+                razorpay_order_id = rzp_order['id']
+            except Exception:
+                razorpay_order_id = f"order_{uuid.uuid4().hex[:14]}"
+
             order.razorpay_order_id = razorpay_order_id
-            order.save()
+            order.save(update_fields=['razorpay_order_id'])
+
+            Payment.objects.create(
+                razorpay_order_id=razorpay_order_id,
+                amount=amount_in_paise,
+                status='Created'
+            )
 
             return render(request, 'payments/razorpay_pay.html', {
                 'order': order,
                 'razorpay_order_id': razorpay_order_id,
+                'razorpay_merchant_key': razorpay_key,
                 'razorpay_key_id': razorpay_key,
-                'amount_in_paise': int(order.grand_total * 100),
+                'amount_in_paise': amount_in_paise,
+                'currency': 'INR',
+                'callback_url': '/paymenthandler/',
+                'user_name': request.user.display_name if request.user.is_authenticated else 'Customer',
+                'user_email': request.user.email if request.user.is_authenticated and request.user.email else 'customer@blinkitclone.local',
+                'user_phone': phone,
             })
 
         messages.success(request, f"Order #{order.order_number} placed successfully! Arriving in {order.eta_minutes} mins.")

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Razorpay Payment Demo - Blinkit{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto px-4 py-16">
+    <div class="bg-white rounded-3xl border border-gray-200 p-8 shadow-xl text-center space-y-6">
+        <div class="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-3xl mx-auto shadow-inner">
+            <i class="fa-solid fa-credit-card"></i>
+        </div>
+
+        <div class="space-y-1">
+            <span class="bg-blue-100 text-blue-800 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">
+                Razorpay Payment
+            </span>
+            <h2 class="text-3xl font-black text-gray-900 pt-2">Pay ₹200</h2>
+            <p class="text-xs text-gray-500 font-medium">Order ID: <strong>{{ razorpay_order_id }}</strong></p>
+        </div>
+
+        <div class="bg-[#F4F6FB] p-4 rounded-2xl border border-gray-200/80 text-xs text-left space-y-2">
+            <div class="flex justify-between text-gray-600">
+                <span>Payment Mode</span>
+                <span class="font-bold text-gray-900">Razorpay (UPI / Card / NetBanking)</span>
+            </div>
+            <div class="flex justify-between items-center text-sm font-black text-gray-900 pt-2 border-t border-gray-200">
+                <span>Total Amount</span>
+                <span class="text-base text-emerald-600 font-black">₹200.00</span>
+            </div>
+        </div>
+
+        <button id="rzp-button1" class="w-full bg-[#0C831F] hover:bg-[#096e1a] text-white font-black py-4 rounded-2xl transition shadow-lg text-sm flex items-center justify-center gap-2 cursor-pointer">
+            <i class="fa-solid fa-lock"></i>
+            <span>Pay with Razorpay</span>
+        </button>
+
+        <form id="payment-form" action="{{ callback_url }}" method="POST" class="hidden">
+            {% csrf_token %}
+            <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+            <input type="hidden" name="razorpay_order_id" id="razorpay_order_id" value="{{ razorpay_order_id }}">
+            <input type="hidden" name="razorpay_signature" id="razorpay_signature">
+        </form>
+
+        <div class="flex items-center justify-center gap-2 text-[11px] text-gray-400 font-medium pt-2">
+            <i class="fa-solid fa-shield-halved text-emerald-600"></i>
+            <span>Secured by Razorpay Payment Gateway</span>
+        </div>
+    </div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+var options = {
+    "key": "{{ razorpay_merchant_key }}",
+    "amount": "{{ razorpay_amount }}",
+    "currency": "{{ currency }}",
+    "name": "Blinkit Quick Commerce",
+    "description": "Test Payment",
+    "order_id": "{{ razorpay_order_id }}",
+    "callback_url": "{{ callback_url }}",
+    "handler": function (response){
+        document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
+        document.getElementById('razorpay_order_id').value = response.razorpay_order_id;
+        document.getElementById('razorpay_signature').value = response.razorpay_signature;
+        document.getElementById('payment-form').submit();
+    },
+    "prefill": {
+        "name": "Blinkit Customer",
+        "email": "customer@blinkitclone.local",
+        "contact": "9876543210"
+    },
+    "theme": {
+        "color": "#0C831F"
+    }
+};
+var rzp1 = new Razorpay(options);
+document.getElementById('rzp-button1').onclick = function(e){
+    rzp1.open();
+    e.preventDefault();
+}
+</script>
+{% endblock %}

@@ -2,6 +2,16 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+from pathlib import Path
+
+# Ensure project base directory and local venv site-packages are in sys.path
+BASE_DIR = Path(__file__).resolve().parent
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
+
+local_site_packages = BASE_DIR / 'myserver' / 'Lib' / 'site-packages'
+if local_site_packages.exists() and str(local_site_packages) not in sys.path:
+    sys.path.insert(1, str(local_site_packages))
 
 
 def main():

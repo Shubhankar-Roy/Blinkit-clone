@@ -61,7 +61,7 @@
             <div class="flex flex-wrap items-center gap-4 pt-1">
                 {% if product.is_out_of_stock or not product.is_active %}
                     <span class="bg-gray-100 text-gray-500 font-extrabold text-sm px-6 py-3.5 rounded-2xl border border-gray-300 uppercase tracking-wider select-none">
-                        Out of Stock at {{ current_location_name|default:'this location' }}
+                        Out of Stock at {{ request.session.location_name|default:'this location' }}
                     </span>
                 {% else %}
                     {% if product.in_cart_qty > 0 %}

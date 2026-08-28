@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from blinkitapps.payment import views as payment_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -11,6 +12,8 @@ urlpatterns = [
     path('location/', include('blinkitapps.darkstore.urls')),
     path('promotions/', include('blinkitapps.promotions.urls')),
     path('orders/', include('blinkitapps.orders.urls')),
+    path('payment/', include('blinkitapps.payment.urls')),
+    path('paymenthandler/', payment_views.paymenthandler, name='paymenthandler'),
     path('dashboard/', include('blinkitapps.products.urls_admin')),
     path('dashboard/darkstore/', include('blinkitapps.darkstore.urls_admin')),
     path('dashboard/coupons/', include('blinkitapps.promotions.urls_admin')),
