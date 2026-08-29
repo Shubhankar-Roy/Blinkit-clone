@@ -3,83 +3,83 @@
 {% block title %}{{ product.name }} - Blinkit Clone{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 py-6 space-y-10">
+<div class="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-6 sm:space-y-10">
 
     <!-- Breadcrumb -->
-    <div class="flex items-center gap-2 text-xs text-gray-400 font-bold uppercase tracking-wider">
+    <div class="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-gray-400 font-bold uppercase tracking-wider overflow-x-auto whitespace-nowrap pb-1">
         <a href="{% url 'products:home' %}" class="hover:text-blinkit-green">Home</a>
-        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        <i class="fa-solid fa-chevron-right text-[8px] sm:text-[10px]"></i>
         <a href="{% url 'products:category_list' product.category.id %}" class="hover:text-blinkit-green">{{ product.category.name }}</a>
-        <i class="fa-solid fa-chevron-right text-[10px]"></i>
-        <span class="text-gray-900 truncate max-w-[200px]">{{ product.name }}</span>
+        <i class="fa-solid fa-chevron-right text-[8px] sm:text-[10px]"></i>
+        <span class="text-gray-900 truncate max-w-[150px] sm:max-w-[200px]">{{ product.name }}</span>
     </div>
 
     <!-- Main Product Showcase Card -->
-    <div class="bg-white rounded-3xl border border-gray-200 p-6 sm:p-10 shadow-sm grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+    <div class="bg-white rounded-2xl sm:rounded-3xl border border-gray-200 p-4 sm:p-8 md:p-10 shadow-sm grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 items-start">
         
         <!-- Left Product Image Showcase -->
-        <div class="md:col-span-5 flex flex-col items-center justify-center p-6 bg-gray-50/70 rounded-2xl border border-gray-100 relative min-h-[320px]">
+        <div class="md:col-span-5 flex flex-col items-center justify-center p-4 sm:p-6 bg-gray-50/70 rounded-2xl border border-gray-100 relative min-h-[240px] sm:min-h-[320px]">
             {% if product.discount_percentage > 0 %}
-            <div class="absolute top-4 left-4 bg-[#256FEF] text-white font-black text-xs px-2.5 py-1 rounded-md shadow">
+            <div class="absolute top-3 left-3 sm:top-4 sm:left-4 bg-[#256FEF] text-white font-black text-[10px] sm:text-xs px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md shadow">
                 {{ product.discount_percentage }}% OFF
             </div>
             {% endif %}
 
-            <img src="{{ product.get_image }}" alt="{{ product.name }}" class="max-h-72 max-w-full object-contain hover:scale-105 transition-transform duration-300">
+            <img src="{{ product.get_image }}" alt="{{ product.name }}" class="max-h-56 sm:max-h-72 max-w-full object-contain hover:scale-105 transition-transform duration-300">
         </div>
 
         <!-- Right Product Info & Actions -->
-        <div class="md:col-span-7 space-y-6">
+        <div class="md:col-span-7 space-y-4 sm:space-y-6">
             
-            <div class="space-y-2">
+            <div class="space-y-1.5 sm:space-y-2">
                 <!-- ETA Badge -->
-                <div class="text-xs font-extrabold text-gray-700 bg-emerald-50 text-blinkit-green px-3 py-1 rounded-full w-max flex items-center gap-1.5 border border-emerald-100">
-                    <i class="fa-solid fa-bolt"></i>
+                <div class="text-[10px] sm:text-xs font-extrabold text-gray-700 bg-emerald-50 text-blinkit-green px-2.5 sm:px-3 py-1 rounded-full w-max flex items-center gap-1.5 border border-emerald-100">
+                    <i class="fa-solid fa-bolt text-xs"></i>
                     <span>Superfast Delivery in {{ eta_mins|default:product.eta_minutes }} MINS</span>
                 </div>
 
-                <h1 class="text-2xl sm:text-3xl font-black text-gray-900 leading-tight">
+                <h1 class="text-xl sm:text-2xl md:text-3xl font-black text-gray-900 leading-tight">
                     {{ product.name }}
                 </h1>
                 
-                <p class="text-sm font-semibold text-gray-500">{{ product.unit_quantity }}</p>
+                <p class="text-xs sm:text-sm font-semibold text-gray-500">{{ product.unit_quantity }}</p>
             </div>
 
             <!-- Price Breakdown -->
-            <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex items-baseline gap-3">
-                <div class="text-3xl font-black text-gray-900">₹{{ product.selling_price|floatformat:0 }}</div>
+            <div class="p-3.5 sm:p-4 bg-gray-50 rounded-2xl border border-gray-100 flex flex-wrap items-baseline gap-2 sm:gap-3">
+                <div class="text-2xl sm:text-3xl font-black text-gray-900">₹{{ product.selling_price|floatformat:0 }}</div>
                 {% if product.discount_percentage > 0 %}
-                <div class="text-base text-gray-400 line-through font-medium">MRP ₹{{ product.mrp|floatformat:0 }}</div>
-                <div class="text-xs font-bold text-emerald-600 bg-emerald-100/70 px-2 py-0.5 rounded">
+                <div class="text-sm sm:text-base text-gray-400 line-through font-medium">MRP ₹{{ product.mrp|floatformat:0 }}</div>
+                <div class="text-[10px] sm:text-xs font-bold text-emerald-600 bg-emerald-100/70 px-2 py-0.5 rounded">
                     Save {{ product.discount_percentage }}%
                 </div>
                 {% endif %}
-                <span class="text-[11px] text-gray-400 ml-auto">(Inclusive of all taxes)</span>
+                <span class="text-[10px] sm:text-[11px] text-gray-400 w-full sm:w-auto sm:ml-auto">(Inclusive of all taxes)</span>
             </div>
 
             <!-- Cart Add / Quantity Stepper / Out of Stock Display -->
-            <div class="flex flex-wrap items-center gap-4 pt-1">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3 pt-1">
                 {% if product.is_out_of_stock or not product.is_active %}
-                    <span class="bg-gray-100 text-gray-500 font-extrabold text-sm px-6 py-3.5 rounded-2xl border border-gray-300 uppercase tracking-wider select-none">
+                    <span class="bg-gray-100 text-gray-500 font-extrabold text-xs sm:text-sm px-5 py-3 rounded-2xl border border-gray-300 uppercase tracking-wider text-center select-none">
                         Out of Stock at {{ request.session.location_name|default:'this location' }}
                     </span>
                 {% else %}
                     {% if product.in_cart_qty > 0 %}
-                    <div class="flex items-center bg-blinkit-green text-white font-black rounded-2xl overflow-hidden shadow-md">
+                    <div class="flex items-center justify-between sm:justify-start bg-blinkit-green text-white font-black rounded-2xl overflow-hidden shadow-md">
                         <form action="{% url 'cart:update' %}" method="POST" class="inline">
                             {% csrf_token %}
                             <input type="hidden" name="product_id" value="{{ product.id }}">
                             <input type="hidden" name="action" value="remove">
-                            <button type="submit" class="px-5 py-3 hover:bg-blinkit-darkgreen text-sm font-black transition cursor-pointer" title="Decrease">-</button>
+                            <button type="submit" class="px-4 sm:px-5 py-2.5 sm:py-3 hover:bg-blinkit-darkgreen text-xs sm:text-sm font-black transition cursor-pointer" title="Decrease">-</button>
                         </form>
                         
-                        <span class="px-4 py-1 text-sm font-black select-none">{{ product.in_cart_qty }} in Cart</span>
+                        <span class="px-3 sm:px-4 py-1 text-xs sm:text-sm font-black select-none">{{ product.in_cart_qty }} in Cart</span>
                         
                         <form action="{% url 'cart:update' %}" method="POST" class="inline">
                             {% csrf_token %}
                             <input type="hidden" name="product_id" value="{{ product.id }}">
                             <input type="hidden" name="action" value="add">
-                            <button type="submit" class="px-5 py-3 hover:bg-blinkit-darkgreen text-sm font-black transition cursor-pointer" title="Increase">+</button>
+                            <button type="submit" class="px-4 sm:px-5 py-2.5 sm:py-3 hover:bg-blinkit-darkgreen text-xs sm:text-sm font-black transition cursor-pointer" title="Increase">+</button>
                         </form>
                     </div>
                     {% else %}
@@ -87,7 +87,7 @@
                         {% csrf_token %}
                         <input type="hidden" name="product_id" value="{{ product.id }}">
                         <input type="hidden" name="action" value="add">
-                        <button type="submit" class="w-full sm:w-auto bg-blinkit-green hover:bg-blinkit-darkgreen text-white font-black px-8 py-3.5 rounded-2xl text-sm uppercase tracking-wider shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 cursor-pointer">
+                        <button type="submit" class="w-full bg-blinkit-green hover:bg-blinkit-darkgreen text-white font-black px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl text-xs sm:text-sm uppercase tracking-wider shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 cursor-pointer">
                             <i class="fa-solid fa-cart-shopping text-xs"></i>
                             <span>Add to Cart</span>
                         </button>
@@ -95,7 +95,7 @@
                     {% endif %}
                 {% endif %}
 
-                <a href="{% url 'cart:detail' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-bold px-6 py-3.5 rounded-2xl transition flex items-center gap-2">
+                <a href="{% url 'cart:detail' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs sm:text-sm font-bold px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl transition flex items-center justify-center gap-2">
                     <i class="fa-solid fa-basket-shopping text-blinkit-green"></i>
                     <span>View Cart ({{ cart_item_count|default:0 }})</span>
                 </a>
@@ -103,28 +103,28 @@
 
             <!-- Product Description -->
             {% if product.description %}
-            <div class="space-y-2">
-                <h3 class="text-xs font-black text-gray-400 uppercase tracking-wider">Product Overview</h3>
-                <p class="text-sm text-gray-700 leading-relaxed bg-white border border-gray-100 p-4 rounded-2xl">
+            <div class="space-y-1.5 sm:space-y-2">
+                <h3 class="text-[10px] sm:text-xs font-black text-gray-400 uppercase tracking-wider">Product Overview</h3>
+                <p class="text-xs sm:text-sm text-gray-700 leading-relaxed bg-white border border-gray-100 p-3 sm:p-4 rounded-2xl">
                     {{ product.description }}
                 </p>
             </div>
             {% endif %}
 
             <!-- Value Propositions -->
-            <div class="grid grid-cols-2 gap-3 pt-2">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 pt-1 sm:pt-2">
                 <div class="p-3 bg-[#F4F6FB] rounded-2xl flex items-center gap-3">
-                    <i class="fa-solid fa-shield-halved text-blinkit-green text-lg"></i>
+                    <i class="fa-solid fa-shield-halved text-blinkit-green text-base sm:text-lg shrink-0"></i>
                     <div class="text-xs">
                         <div class="font-bold text-gray-900">100% Genuine Quality</div>
-                        <div class="text-gray-500">Source verified by Blinkit</div>
+                        <div class="text-[11px] text-gray-500">Source verified by Blinkit</div>
                     </div>
                 </div>
                 <div class="p-3 bg-[#F4F6FB] rounded-2xl flex items-center gap-3">
-                    <i class="fa-solid fa-truck-fast text-blinkit-green text-lg"></i>
+                    <i class="fa-solid fa-truck-fast text-blinkit-green text-base sm:text-lg shrink-0"></i>
                     <div class="text-xs">
                         <div class="font-bold text-gray-900">Instant Dispatch</div>
-                        <div class="text-gray-500">Direct to your doorstep</div>
+                        <div class="text-[11px] text-gray-500">Direct to your doorstep</div>
                     </div>
                 </div>
             </div>
@@ -136,14 +136,14 @@
     <!-- Related Products -->
     {% if related_products %}
     <section>
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center justify-between mb-3 sm:mb-4">
             <div>
-                <h2 class="text-xl font-black text-gray-900">You Might Also Like</h2>
-                <p class="text-xs text-gray-500">More items in {{ product.category.name }}</p>
+                <h2 class="text-lg sm:text-xl font-black text-gray-900">You Might Also Like</h2>
+                <p class="text-[11px] sm:text-xs text-gray-500">More items in {{ product.category.name }}</p>
             </div>
         </div>
 
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-3 md:gap-4">
             {% for rel in related_products %}
                 {% include 'components/product_card.html' with product=rel %}
             {% endfor %}

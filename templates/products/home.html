@@ -3,33 +3,33 @@
 {% block title %}Blinkit - Instant Grocery Delivery in 10 mins{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 py-6 space-y-10">
+<div class="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-6 sm:space-y-10">
 
     <!-- Hero Promotional Banner -->
-    <div class="bg-gradient-to-r from-[#0C831F] via-[#0b741c] to-[#044c10] rounded-3xl p-6 sm:p-10 text-white flex flex-col md:flex-row items-center justify-between shadow-xl relative overflow-hidden">
-        <div class="space-y-3 z-10 max-w-xl">
-            <span class="inline-flex items-center gap-1.5 bg-blinkit-yellow text-gray-950 font-black text-xs px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
-                <i class="fa-solid fa-bolt text-xs text-emerald-900"></i> Delivery in {{ request.session.eta_mins|default:10 }} Minutes
+    <div class="bg-gradient-to-r from-[#0C831F] via-[#0b741c] to-[#044c10] rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-10 text-white flex flex-col md:flex-row items-center justify-between shadow-xl relative overflow-hidden">
+        <div class="space-y-2.5 sm:space-y-3 z-10 max-w-xl text-center md:text-left">
+            <span class="inline-flex items-center gap-1.5 bg-blinkit-yellow text-gray-950 font-black text-[10px] sm:text-xs px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full uppercase tracking-wider shadow-sm">
+                <i class="fa-solid fa-bolt text-[10px] sm:text-xs text-emerald-900"></i> Delivery in {{ request.session.eta_mins|default:10 }} Minutes
             </span>
-            <h1 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight">
+            <h1 class="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight">
                 India's Last Minute App
             </h1>
-            <p class="text-emerald-100 text-sm md:text-base font-medium">
+            <p class="text-emerald-100 text-xs sm:text-sm md:text-base font-medium">
                 Order fresh fruits, vegetables, dairy, snacks, cold drinks, and daily essentials at lowest prices.
             </p>
-            <div class="pt-2 flex flex-wrap items-center gap-3">
-                <a href="{% url 'products:all_categories' %}" class="bg-white text-blinkit-green hover:bg-emerald-50 font-extrabold px-6 py-3 rounded-xl text-xs uppercase tracking-wider transition shadow-md">
+            <div class="pt-1.5 sm:pt-2 flex flex-wrap items-center justify-center md:justify-start gap-2.5 sm:gap-3">
+                <a href="{% url 'products:all_categories' %}" class="bg-white text-blinkit-green hover:bg-emerald-50 font-extrabold px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-xs uppercase tracking-wider transition shadow-md">
                     Shop by Category
                 </a>
-                <label for="location-modal-toggle" class="cursor-pointer bg-emerald-800/80 hover:bg-emerald-900 text-emerald-100 font-bold px-4 py-3 rounded-xl text-xs transition flex items-center gap-1.5 border border-emerald-600/50">
-                    <i class="fa-solid fa-location-dot"></i>
-                    <span>{{ request.session.location_name|default:'Koramangala, Bengaluru' }}</span>
+                <label for="location-modal-toggle" class="cursor-pointer bg-emerald-800/80 hover:bg-emerald-900 text-emerald-100 font-bold px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs transition flex items-center gap-1.5 border border-emerald-600/50 max-w-[200px] sm:max-w-none truncate">
+                    <i class="fa-solid fa-location-dot shrink-0"></i>
+                    <span class="truncate">{{ request.session.location_name|default:'Koramangala, Bengaluru' }}</span>
                 </label>
             </div>
         </div>
 
         <!-- Decorative Illustration -->
-        <div class="mt-6 md:mt-0 text-7xl sm:text-8xl select-none z-10 flex items-center gap-2 drop-shadow-md">
+        <div class="mt-4 md:mt-0 text-5xl sm:text-7xl md:text-8xl select-none z-10 flex items-center gap-2 drop-shadow-md">
             <span>🥦</span>
             <span>🥛</span>
             <span>🍞</span>
@@ -42,10 +42,10 @@
     <!-- Quick Search Suggestions Chips -->
     {% if search_keywords %}
     <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-        <span class="text-xs font-bold text-gray-400 shrink-0 uppercase tracking-wider">Quick Search:</span>
+        <span class="text-[10px] sm:text-xs font-bold text-gray-400 shrink-0 uppercase tracking-wider">Quick Search:</span>
         {% for kw in search_keywords %}
-        <a href="{% url 'products:search' %}?q={{ kw }}" class="bg-white hover:bg-emerald-50 hover:text-blinkit-green text-gray-700 font-bold text-xs px-3.5 py-1.5 rounded-full border border-gray-200 shadow-2xs transition shrink-0 flex items-center gap-1">
-            <i class="fa-solid fa-magnifying-glass text-[10px] text-gray-400"></i>
+        <a href="{% url 'products:search' %}?q={{ kw }}" class="bg-white hover:bg-emerald-50 hover:text-blinkit-green text-gray-700 font-bold text-xs px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full border border-gray-200 shadow-2xs transition shrink-0 flex items-center gap-1">
+            <i class="fa-solid fa-magnifying-glass text-[9px] sm:text-[10px] text-gray-400"></i>
             <span>{{ kw }}</span>
         </a>
         {% endfor %}
@@ -54,26 +54,26 @@
 
     <!-- Shop by Category Grid -->
     <section>
-        <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center justify-between mb-3 sm:mb-5">
             <div>
-                <h2 class="text-xl md:text-2xl font-black text-gray-900">Shop by Category</h2>
-                <p class="text-xs text-gray-500">Explore wide range of groceries and essentials</p>
+                <h2 class="text-lg sm:text-xl md:text-2xl font-black text-gray-900">Shop by Category</h2>
+                <p class="text-[11px] sm:text-xs text-gray-500">Explore wide range of groceries and essentials</p>
             </div>
             <a href="{% url 'products:all_categories' %}" class="text-xs font-bold text-blinkit-green hover:underline">See All</a>
         </div>
 
-        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
+        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 sm:gap-3 md:gap-4">
             {% for cat in categories %}
-            <a href="{% url 'products:category_list' cat.id %}" class="flex flex-col items-center bg-white rounded-2xl p-3 sm:p-4 border border-gray-200/70 hover:border-emerald-300 hover:shadow-lg transition-all duration-200 text-center group">
-                <div class="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center mb-2.5 rounded-xl bg-gray-50 group-hover:bg-emerald-50/60 transition-colors p-2">
+            <a href="{% url 'products:category_list' cat.id %}" class="flex flex-col items-center bg-white rounded-2xl p-2.5 sm:p-3 md:p-4 border border-gray-200/70 hover:border-emerald-300 hover:shadow-lg transition-all duration-200 text-center group">
+                <div class="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 flex items-center justify-center mb-1.5 sm:mb-2.5 rounded-xl bg-gray-50 group-hover:bg-emerald-50/60 transition-colors p-1.5 sm:p-2">
                     <img src="{{ cat.get_image }}" alt="{{ cat.name }}" class="max-h-full max-w-full object-contain group-hover:scale-110 transition-transform duration-200">
                 </div>
-                <span class="text-xs font-bold text-gray-800 line-clamp-2 leading-tight group-hover:text-blinkit-green transition-colors">{{ cat.name }}</span>
+                <span class="text-[11px] sm:text-xs font-bold text-gray-800 line-clamp-2 leading-tight group-hover:text-blinkit-green transition-colors">{{ cat.name }}</span>
             </a>
             {% empty %}
-            <div class="col-span-full bg-white p-8 rounded-2xl text-center text-gray-500 border border-gray-200">
+            <div class="col-span-full bg-white p-6 sm:p-8 rounded-2xl text-center text-gray-500 border border-gray-200">
                 <i class="fa-solid fa-layer-group text-3xl text-gray-300 mb-2"></i>
-                <p class="font-bold">No categories found.</p>
+                <p class="font-bold text-xs sm:text-sm">No categories found.</p>
             </div>
             {% endfor %}
         </div>
@@ -82,16 +82,16 @@
     <!-- Trending Products -->
     {% if trending_products %}
     <section>
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center justify-between mb-3 sm:mb-4">
             <div>
-                <h2 class="text-xl md:text-2xl font-black text-gray-900 flex items-center gap-2">
+                <h2 class="text-lg sm:text-xl md:text-2xl font-black text-gray-900 flex items-center gap-1.5 sm:gap-2">
                     <span>🔥 Trending in {{ request.session.location_name|default:'Bengaluru' }}</span>
                 </h2>
-                <p class="text-xs text-gray-500">Most ordered items right now</p>
+                <p class="text-[11px] sm:text-xs text-gray-500">Most ordered items right now</p>
             </div>
         </div>
 
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-3 md:gap-4">
             {% for product in trending_products %}
                 {% include 'components/product_card.html' with product=product %}
             {% endfor %}
@@ -102,16 +102,16 @@
     <!-- Bestseller Products -->
     {% if bestseller_products %}
     <section>
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center justify-between mb-3 sm:mb-4">
             <div>
-                <h2 class="text-xl md:text-2xl font-black text-gray-900 flex items-center gap-2">
+                <h2 class="text-lg sm:text-xl md:text-2xl font-black text-gray-900 flex items-center gap-1.5 sm:gap-2">
                     <span>⭐ Daily Bestsellers</span>
                 </h2>
-                <p class="text-xs text-gray-500">Staples ordered by thousands of customers every day</p>
+                <p class="text-[11px] sm:text-xs text-gray-500">Staples ordered by thousands of customers every day</p>
             </div>
         </div>
 
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-3 md:gap-4">
             {% for product in bestseller_products %}
                 {% include 'components/product_card.html' with product=product %}
             {% endfor %}
@@ -122,14 +122,14 @@
     <!-- All Available Products -->
     {% if all_products %}
     <section>
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center justify-between mb-3 sm:mb-4">
             <div>
-                <h2 class="text-xl md:text-2xl font-black text-gray-900">Featured Essentials</h2>
-                <p class="text-xs text-gray-500">Handpicked items ready for instant 10-minute dispatch</p>
+                <h2 class="text-lg sm:text-xl md:text-2xl font-black text-gray-900">Featured Essentials</h2>
+                <p class="text-[11px] sm:text-xs text-gray-500">Handpicked items ready for instant 10-minute dispatch</p>
             </div>
         </div>
 
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-3 md:gap-4">
             {% for product in all_products %}
                 {% include 'components/product_card.html' with product=product %}
             {% endfor %}

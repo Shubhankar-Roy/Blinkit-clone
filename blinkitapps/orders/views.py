@@ -192,7 +192,7 @@ def checkout_view(request):
                 status='Created'
             )
 
-            return render(request, 'payments/razorpay_pay.html', {
+            return render(request, 'payment/razorpay_pay.html', {
                 'order': order,
                 'razorpay_order_id': razorpay_order_id,
                 'razorpay_merchant_key': razorpay_key,

@@ -9,6 +9,7 @@ urlpatterns = [
     path('stores/create/', views_admin.admin_darkstore_create, name='create'),
     path('stores/<int:store_id>/edit/', views_admin.admin_darkstore_edit, name='edit'),
     path('stores/<int:store_id>/toggle/', views_admin.admin_darkstore_toggle_status, name='toggle'),
+    path('stores/<int:store_id>/delete/', views_admin.admin_darkstore_delete, name='delete'),
     path('stores/<int:store_id>/inventory/', views_admin.admin_darkstore_inventory, name='inventory'),
     path('inventory/<int:inventory_id>/update/', views_admin.admin_darkstore_stock_update, name='stock_update'),
     path('stores/<int:store_id>/bulk-restock/', views_admin.admin_darkstore_bulk_restock, name='bulk_restock'),

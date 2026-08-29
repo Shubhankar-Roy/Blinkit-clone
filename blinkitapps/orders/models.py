@@ -66,8 +66,6 @@ class Order(models.Model):
 
     class Meta:
         ordering = ['-created_at']
-        verbose_name = "Order"
-        verbose_name_plural = "Orders & Deliveries"
 
     @property
     def delivery_partner_name(self):
@@ -115,8 +113,6 @@ class OrderItem(models.Model):
 
     class Meta:
         ordering = ['id']
-        verbose_name = "Order Item"
-        verbose_name_plural = "Order Items"
 
     def __str__(self):
         return f"{self.quantity} x {self.product_name} in Order #{self.order.order_number}"

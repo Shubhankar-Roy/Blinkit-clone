@@ -3,32 +3,32 @@
 {% block title %}Checkout - Blinkit Clone{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-8">
+<div class="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
     
     <!-- Breadcrumb -->
-    <div class="flex items-center gap-2 text-xs text-gray-400 font-bold uppercase tracking-wider mb-6">
+    <div class="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-gray-400 font-bold uppercase tracking-wider mb-4 sm:mb-6 overflow-x-auto whitespace-nowrap pb-1">
         <a href="{% url 'products:home' %}" class="hover:text-blinkit-green">Home</a>
-        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        <i class="fa-solid fa-chevron-right text-[8px] sm:text-[10px]"></i>
         <a href="{% url 'cart:detail' %}" class="hover:text-blinkit-green">Cart</a>
-        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        <i class="fa-solid fa-chevron-right text-[8px] sm:text-[10px]"></i>
         <span class="text-gray-900">Checkout & Payment</span>
     </div>
 
-    <form method="POST" action="{% url 'orders:checkout' %}" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <form method="POST" action="{% url 'orders:checkout' %}" class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-start">
         {% csrf_token %}
 
         <!-- Left: Address Selection & Payment Methods -->
-        <div class="lg:col-span-8 space-y-6">
+        <div class="lg:col-span-8 space-y-4 sm:space-y-6">
             
             <!-- Delivery ETA & Store Banner -->
-            <div class="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-3xl p-5 text-white shadow-lg flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl font-black">
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl sm:rounded-3xl p-4 sm:p-5 text-white shadow-lg flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 sm:gap-4">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-xl sm:text-2xl font-black shrink-0">
                         <i class="fa-solid fa-bolt"></i>
                     </div>
                     <div>
-                        <h2 class="text-lg font-black leading-tight">Delivery in {{ eta_mins|default:10 }} minutes</h2>
-                        <p class="text-xs text-emerald-100 font-medium">Dispatched from <strong>{{ dark_store.name|default:'Fulfillment Hub' }}</strong></p>
+                        <h2 class="text-base sm:text-lg font-black leading-tight">Delivery in {{ eta_mins|default:10 }} minutes</h2>
+                        <p class="text-[11px] sm:text-xs text-emerald-100 font-medium">Dispatched from <strong>{{ dark_store.name|default:'Fulfillment Hub' }}</strong></p>
                     </div>
                 </div>
                 <div class="text-right hidden sm:block">
@@ -39,37 +39,37 @@
             </div>
 
             <!-- Step 1: Select Delivery Address -->
-            <div class="bg-white rounded-3xl border border-gray-200 p-6 sm:p-7 shadow-sm space-y-4">
-                <div class="flex items-center justify-between border-b border-gray-100 pb-4">
-                    <h3 class="text-base font-black text-gray-900 flex items-center gap-2.5">
-                        <span class="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-800 text-xs flex items-center justify-center font-black">1</span>
+            <div class="bg-white rounded-2xl sm:rounded-3xl border border-gray-200 p-4 sm:p-7 shadow-sm space-y-3.5 sm:space-y-4">
+                <div class="flex items-center justify-between border-b border-gray-100 pb-3 sm:pb-4">
+                    <h3 class="text-sm sm:text-base font-black text-gray-900 flex items-center gap-2 sm:gap-2.5">
+                        <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg sm:rounded-xl bg-emerald-100 text-emerald-800 text-xs flex items-center justify-center font-black">1</span>
                         <span>Select Delivery Address</span>
                     </h3>
                 </div>
 
                 <!-- Existing Saved Addresses -->
                 {% if user_addresses %}
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3.5">
                     {% for addr in user_addresses %}
-                    <label class="relative p-4 rounded-2xl border-2 cursor-pointer transition flex items-start gap-3 {% if addr.is_default or forloop.first %}border-emerald-600 bg-emerald-50/20{% else %}border-gray-200 hover:border-gray-300{% endif %}">
+                    <label class="relative p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border-2 cursor-pointer transition flex items-start gap-2.5 sm:gap-3 {% if addr.is_default or forloop.first %}border-emerald-600 bg-emerald-50/20{% else %}border-gray-200 hover:border-gray-300{% endif %}">
                         <input type="radio" 
                                name="address_id" 
                                value="{{ addr.id }}" 
                                {% if addr.is_default or forloop.first %}checked{% endif %}
                                class="mt-1 text-emerald-600 focus:ring-emerald-500">
                         <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-2">
-                                <span class="bg-slate-100 text-slate-700 text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider">
+                            <div class="flex items-center gap-1.5 sm:gap-2">
+                                <span class="bg-slate-100 text-slate-700 text-[9px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded uppercase tracking-wider">
                                     {{ addr.address_type }}
                                 </span>
                                 {% if addr.is_default %}
-                                <span class="text-[10px] text-emerald-600 font-extrabold">DEFAULT</span>
+                                <span class="text-[9px] sm:text-[10px] text-emerald-600 font-extrabold">DEFAULT</span>
                                 {% endif %}
                             </div>
-                            <p class="text-xs font-bold text-gray-900 mt-1.5 leading-snug">{{ addr.street_address }}</p>
-                            <p class="text-[11px] text-gray-500 font-medium">{{ addr.city }} - {{ addr.pincode }}</p>
+                            <p class="text-xs font-bold text-gray-900 mt-1 sm:mt-1.5 leading-snug">{{ addr.street_address }}</p>
+                            <p class="text-[10px] sm:text-[11px] text-gray-500 font-medium">{{ addr.city }} - {{ addr.pincode }}</p>
                             {% if addr.landmark %}
-                            <p class="text-[10px] text-gray-400 font-medium mt-0.5">Near {{ addr.landmark }}</p>
+                            <p class="text-[9px] sm:text-[10px] text-gray-400 font-medium mt-0.5">Near {{ addr.landmark }}</p>
                             {% endif %}
                         </div>
                     </label>
@@ -78,8 +78,8 @@
                 {% endif %}
 
                 <!-- Option to enter New Address -->
-                <div class="pt-2">
-                    <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-gray-700 mb-3">
+                <div class="pt-1 sm:pt-2">
+                    <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-gray-700 mb-2.5 sm:mb-3">
                         <input type="radio" 
                                name="address_id" 
                                value="new" 
@@ -88,9 +88,9 @@
                         <span>{% if user_addresses %}Deliver to a different / new address{% else %}Enter Delivery Address{% endif %}</span>
                     </label>
 
-                    <div class="bg-[#F4F6FB] p-5 rounded-2xl border border-gray-200/80 space-y-3">
+                    <div class="bg-[#F4F6FB] p-3.5 sm:p-5 rounded-2xl border border-gray-200/80 space-y-3">
                         <div>
-                            <label class="block text-[11px] font-extrabold text-gray-600 uppercase tracking-wider mb-1">
+                            <label class="block text-[10px] sm:text-[11px] font-extrabold text-gray-600 uppercase tracking-wider mb-1">
                                 Flat / House / Building & Street Address *
                             </label>
                             <input type="text" 
@@ -99,23 +99,23 @@
                                    class="w-full bg-white text-xs font-semibold rounded-xl px-3.5 py-2.5 border border-gray-200 focus:border-emerald-500 focus:outline-none">
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
                             <div>
-                                <label class="block text-[11px] font-extrabold text-gray-600 uppercase tracking-wider mb-1">City</label>
+                                <label class="block text-[10px] sm:text-[11px] font-extrabold text-gray-600 uppercase tracking-wider mb-1">City</label>
                                 <input type="text" 
                                        name="city" 
                                        value="Bengaluru" 
                                        class="w-full bg-white text-xs font-semibold rounded-xl px-3.5 py-2.5 border border-gray-200 focus:border-emerald-500 focus:outline-none">
                             </div>
                             <div>
-                                <label class="block text-[11px] font-extrabold text-gray-600 uppercase tracking-wider mb-1">Pincode</label>
+                                <label class="block text-[10px] sm:text-[11px] font-extrabold text-gray-600 uppercase tracking-wider mb-1">Pincode</label>
                                 <input type="text" 
                                        name="pincode" 
                                        value="{{ current_pincode|default:'560034' }}" 
                                        class="w-full bg-white text-xs font-semibold rounded-xl px-3.5 py-2.5 border border-gray-200 focus:border-emerald-500 focus:outline-none">
                             </div>
                             <div>
-                                <label class="block text-[11px] font-extrabold text-gray-600 uppercase tracking-wider mb-1">Address Tag</label>
+                                <label class="block text-[10px] sm:text-[11px] font-extrabold text-gray-600 uppercase tracking-wider mb-1">Address Tag</label>
                                 <select name="address_type" class="w-full bg-white text-xs font-semibold rounded-xl px-3.5 py-2.5 border border-gray-200 focus:border-emerald-500 focus:outline-none">
                                     <option value="HOME">Home</option>
                                     <option value="WORK">Work</option>
@@ -125,7 +125,7 @@
                         </div>
 
                         <div>
-                            <label class="block text-[11px] font-extrabold text-gray-600 uppercase tracking-wider mb-1">Nearby Landmark (Optional)</label>
+                            <label class="block text-[10px] sm:text-[11px] font-extrabold text-gray-600 uppercase tracking-wider mb-1">Nearby Landmark (Optional)</label>
                             <input type="text" 
                                    name="landmark" 
                                    placeholder="e.g. Opposite Sony World Signal" 
@@ -140,8 +140,8 @@
                 </div>
 
                 <!-- Contact Phone -->
-                <div class="pt-2">
-                    <label class="block text-[11px] font-extrabold text-gray-700 uppercase tracking-wider mb-1">
+                <div class="pt-1 sm:pt-2">
+                    <label class="block text-[10px] sm:text-[11px] font-extrabold text-gray-700 uppercase tracking-wider mb-1">
                         Delivery Contact Phone Number *
                     </label>
                     <input type="tel" 
@@ -154,43 +154,43 @@
             </div>
 
             <!-- Step 2: Payment Method -->
-            <div class="bg-white rounded-3xl border border-gray-200 p-6 sm:p-7 shadow-sm space-y-4">
-                <div class="flex items-center justify-between border-b border-gray-100 pb-4">
-                    <h3 class="text-base font-black text-gray-900 flex items-center gap-2.5">
-                        <span class="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-800 text-xs flex items-center justify-center font-black">2</span>
+            <div class="bg-white rounded-2xl sm:rounded-3xl border border-gray-200 p-4 sm:p-7 shadow-sm space-y-3.5 sm:space-y-4">
+                <div class="flex items-center justify-between border-b border-gray-100 pb-3 sm:pb-4">
+                    <h3 class="text-sm sm:text-base font-black text-gray-900 flex items-center gap-2 sm:gap-2.5">
+                        <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg sm:rounded-xl bg-emerald-100 text-emerald-800 text-xs flex items-center justify-center font-black">2</span>
                         <span>Select Payment Method</span>
                     </h3>
                 </div>
 
-                <div class="space-y-3">
+                <div class="space-y-2.5 sm:space-y-3">
                     <!-- Cash on Delivery (COD) -->
-                    <label class="p-4 rounded-2xl border-2 border-gray-200 hover:border-emerald-600 bg-white hover:bg-emerald-50/20 cursor-pointer transition flex items-center justify-between">
-                        <div class="flex items-center gap-3.5">
+                    <label class="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border-2 border-gray-200 hover:border-emerald-600 bg-white hover:bg-emerald-50/20 cursor-pointer transition flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
                             <input type="radio" name="payment_method" value="COD" checked class="text-emerald-600 focus:ring-emerald-500">
-                            <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-lg">
+                            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-base sm:text-lg shrink-0">
                                 <i class="fa-solid fa-money-bill-wave"></i>
                             </div>
-                            <div>
+                            <div class="min-w-0">
                                 <div class="text-xs font-black text-gray-900">Cash on Delivery (COD)</div>
-                                <div class="text-[11px] text-gray-500 font-medium">Pay via Cash / QR code scan upon doorstep arrival</div>
+                                <div class="text-[10px] sm:text-[11px] text-gray-500 font-medium truncate">Pay cash / QR scan at doorstep</div>
                             </div>
                         </div>
-                        <span class="text-[10px] bg-emerald-100 text-emerald-800 font-black px-2 py-0.5 rounded">NO EXTRA CHARGE</span>
+                        <span class="text-[9px] sm:text-[10px] bg-emerald-100 text-emerald-800 font-black px-2 py-0.5 rounded shrink-0">NO EXTRA CHARGE</span>
                     </label>
 
                     <!-- Razorpay Online Payment -->
-                    <label class="p-4 rounded-2xl border-2 border-gray-200 hover:border-emerald-600 bg-white hover:bg-emerald-50/20 cursor-pointer transition flex items-center justify-between">
-                        <div class="flex items-center gap-3.5">
+                    <label class="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border-2 border-gray-200 hover:border-emerald-600 bg-white hover:bg-emerald-50/20 cursor-pointer transition flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
                             <input type="radio" name="payment_method" value="RAZORPAY" class="text-emerald-600 focus:ring-emerald-500">
-                            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center text-lg">
+                            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center text-base sm:text-lg shrink-0">
                                 <i class="fa-solid fa-credit-card"></i>
                             </div>
-                            <div>
-                                <div class="text-xs font-black text-gray-900">Razorpay (UPI / Google Pay / Cards / NetBanking)</div>
-                                <div class="text-[11px] text-gray-500 font-medium">Instant 100% secure payment gateway</div>
+                            <div class="min-w-0">
+                                <div class="text-xs font-black text-gray-900 truncate">Razorpay (UPI / Cards / NetBanking)</div>
+                                <div class="text-[10px] sm:text-[11px] text-gray-500 font-medium truncate">Instant 100% secure payment gateway</div>
                             </div>
                         </div>
-                        <span class="text-[10px] bg-blue-100 text-blue-800 font-black px-2 py-0.5 rounded">FAST & SECURE</span>
+                        <span class="text-[9px] sm:text-[10px] bg-blue-100 text-blue-800 font-black px-2 py-0.5 rounded shrink-0">FAST & SECURE</span>
                     </label>
                 </div>
             </div>
@@ -201,7 +201,7 @@
         <div class="lg:col-span-4 space-y-4">
             
             <!-- Items in Cart Preview -->
-            <div class="bg-white rounded-3xl border border-gray-200 p-5 shadow-sm space-y-3">
+            <div class="bg-white rounded-2xl sm:rounded-3xl border border-gray-200 p-4 sm:p-5 shadow-sm space-y-3">
                 <div class="flex items-center justify-between text-xs font-black text-gray-900">
                     <span>Order Summary</span>
                     <a href="{% url 'cart:detail' %}" class="text-blinkit-green font-bold hover:underline">Edit Cart</a>
@@ -209,9 +209,9 @@
 
                 <div class="max-h-56 overflow-y-auto divide-y divide-gray-100 pr-1">
                     {% for item in cart.items.all %}
-                    <div class="py-2.5 flex items-center justify-between text-xs">
-                        <div class="flex items-center gap-2.5 min-w-0">
-                            <span class="font-extrabold text-gray-500 text-[11px] shrink-0">{{ item.quantity }}x</span>
+                    <div class="py-2 sm:py-2.5 flex items-center justify-between text-xs">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="font-extrabold text-gray-500 text-[10px] sm:text-[11px] shrink-0">{{ item.quantity }}x</span>
                             <span class="font-bold text-gray-900 truncate">{{ item.product.name }}</span>
                         </div>
                         <span class="font-black text-gray-900 shrink-0 ml-2">₹{{ item.subtotal|floatformat:0 }}</span>
@@ -221,10 +221,10 @@
             </div>
 
             <!-- Bill Breakdown Card -->
-            <div class="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm space-y-3.5">
+            <div class="bg-white rounded-2xl sm:rounded-3xl border border-gray-200 p-4 sm:p-6 shadow-sm space-y-3.5">
                 <h3 class="font-black text-gray-900 uppercase tracking-wider text-xs">Bill Details</h3>
                 
-                <div class="space-y-2.5 text-xs">
+                <div class="space-y-2 sm:space-y-2.5 text-xs">
                     <div class="flex justify-between text-gray-600">
                         <span>Items Subtotal</span>
                         <span class="font-bold text-gray-900">₹{{ cart.items_subtotal|floatformat:0 }}</span>
@@ -268,21 +268,21 @@
                     </div>
                     {% endif %}
 
-                    <div class="flex justify-between items-center text-base font-black text-gray-900 pt-3 border-t border-gray-200">
+                    <div class="flex justify-between items-center text-sm sm:text-base font-black text-gray-900 pt-2.5 sm:pt-3 border-t border-gray-200">
                         <span>To Pay</span>
-                        <span class="text-xl text-gray-900 font-black">₹{{ cart.grand_total|floatformat:0 }}</span>
+                        <span class="text-lg sm:text-xl text-gray-900 font-black">₹{{ cart.grand_total|floatformat:0 }}</span>
                     </div>
                 </div>
 
                 <!-- Submit Button -->
-                <button type="submit" class="w-full bg-blinkit-green hover:bg-blinkit-darkgreen text-white font-black py-4 rounded-2xl transition shadow-lg hover:shadow-xl text-sm flex items-center justify-center gap-2 cursor-pointer mt-2">
+                <button type="submit" class="w-full bg-blinkit-green hover:bg-blinkit-darkgreen text-white font-black py-3.5 sm:py-4 rounded-2xl transition shadow-lg hover:shadow-xl text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer mt-2">
                     <i class="fa-solid fa-lock text-xs"></i>
                     <span>Place Order (₹{{ cart.grand_total|floatformat:0 }})</span>
                 </button>
 
                 <!-- Secure Guarantee -->
-                <div class="flex items-center justify-center gap-2 text-[11px] text-gray-400 font-bold pt-1">
-                    <i class="fa-solid fa-shield-halved text-emerald-600"></i>
+                <div class="flex items-center justify-center gap-2 text-[10px] sm:text-[11px] text-gray-400 font-bold pt-1 text-center">
+                    <i class="fa-solid fa-shield-halved text-emerald-600 shrink-0"></i>
                     <span>100% Safe & Secure Instant Delivery</span>
                 </div>
             </div>

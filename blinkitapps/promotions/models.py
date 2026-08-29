@@ -27,8 +27,6 @@ class Coupon(models.Model):
 
     class Meta:
         ordering = ['-created_at']
-        verbose_name = "Coupon"
-        verbose_name_plural = "Coupons & Offers"
 
     def is_valid_for_cart(self, cart_total):
         """

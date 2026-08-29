@@ -9,7 +9,6 @@ class Category(models.Model):
 
     class Meta:
         ordering = ['display_order', 'name']
-        verbose_name_plural = "Categories"
 
     def get_image(self):
         if self.image:
@@ -27,7 +26,6 @@ class SubCategory(models.Model):
 
     class Meta:
         ordering = ['name']
-        verbose_name_plural = "Sub Categories"
 
     def __str__(self):
         return f"{self.category.name} -> {self.name}"

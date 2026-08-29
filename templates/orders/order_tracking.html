@@ -4,37 +4,57 @@
 
 {% block extra_head %}
 <!-- Leaflet.js CSS for Real-Time Delivery Map -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 <style>
+    #live-delivery-map {
+        height: 320px;
+        min-height: 280px;
+        width: 100%;
+        border-radius: 1.25rem;
+        position: relative;
+        overflow: hidden !important;
+        z-index: 1;
+    }
+    .leaflet-container {
+        width: 100% !important;
+        height: 100% !important;
+        border-radius: 1.25rem;
+        position: relative !important;
+        overflow: hidden !important;
+        background: #f8fafc;
+    }
     .custom-map-pin {
         display: flex;
         align-items: center;
         justify-content: center;
         border-radius: 50%;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 py-8 space-y-6">
-    
+<div class="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-8 space-y-4 sm:space-y-6">
+
     <!-- Breadcrumb -->
-    <div class="flex items-center gap-2 text-xs text-gray-400 font-bold uppercase tracking-wider">
+    <div class="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-gray-400 font-bold uppercase tracking-wider overflow-x-auto whitespace-nowrap pb-1">
         <a href="{% url 'products:home' %}" class="hover:text-blinkit-green">Home</a>
-        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        <i class="fa-solid fa-chevron-right text-[8px] sm:text-[10px]"></i>
         <a href="{% url 'orders:history' %}" class="hover:text-blinkit-green">My Orders</a>
-        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        <i class="fa-solid fa-chevron-right text-[8px] sm:text-[10px]"></i>
         <span class="text-gray-900">Track Order</span>
     </div>
 
     <!-- Live Status Main Card -->
-    <div class="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden" id="tracking-card">
-        
+    <div class="bg-white rounded-2xl sm:rounded-3xl border border-gray-200 shadow-sm overflow-hidden" id="tracking-card">
+
         <!-- Order Header Banner -->
-        <div class="bg-gradient-to-r {% if order.status == 'DELIVERED' %}from-emerald-600 to-teal-700{% elif order.status == 'CANCELLED' %}from-red-600 to-rose-700{% else %}from-emerald-600 to-teal-600{% endif %} p-6 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div class="flex items-center gap-4">
-                <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-3xl shrink-0">
+        <div
+            class="bg-gradient-to-r {% if order.status == 'DELIVERED' %}from-emerald-600 to-teal-700{% elif order.status == 'CANCELLED' %}from-red-600 to-rose-700{% else %}from-emerald-600 to-teal-600{% endif %} p-4 sm:p-6 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+            <div class="flex items-center gap-3 sm:gap-4">
+                <div
+                    class="w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl sm:text-3xl shrink-0">
                     {% if order.status == 'DELIVERED' %}
                     <i class="fa-solid fa-house-chimney-check"></i>
                     {% elif order.status == 'CANCELLED' %}
@@ -43,14 +63,15 @@
                     <i class="fa-solid fa-truck-fast animate-bounce"></i>
                     {% endif %}
                 </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs font-extrabold uppercase tracking-widest text-emerald-100">Live Delivery Status</span>
-                        <span id="badge-status" class="bg-white {% if order.status == 'CANCELLED' %}text-red-700{% else %}text-emerald-800{% endif %} text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">
+                <div class="min-w-0">
+                    <div class="flex items-center gap-1.5 sm:gap-2">
+                        <span class="text-[10px] sm:text-xs font-extrabold uppercase tracking-widest text-emerald-100">Live Delivery</span>
+                        <span id="badge-status"
+                            class="bg-white {% if order.status == 'CANCELLED' %}text-red-700{% else %}text-emerald-800{% endif %} text-[9px] sm:text-[10px] font-black px-2 sm:px-2.5 py-0.5 rounded-full uppercase">
                             {{ order.get_status_display }}
                         </span>
                     </div>
-                    <h2 id="heading-eta" class="text-2xl font-black mt-0.5">
+                    <h2 id="heading-eta" class="text-lg sm:text-2xl font-black mt-0.5 leading-tight">
                         {% if order.status == 'DELIVERED' %}
                         Delivered to Your Doorstep!
                         {% elif order.status == 'CANCELLED' %}
@@ -59,14 +80,16 @@
                         Arriving in ~<span id="live-eta-mins">{{ order.eta_minutes }}</span> Minutes
                         {% endif %}
                     </h2>
-                    <p class="text-xs text-emerald-100 mt-0.5 font-medium">Order <strong>#{{ order.order_number }}</strong> • Placed at {{ order.created_at|date:"h:i A" }}</p>
+                    <p class="text-[11px] sm:text-xs text-emerald-100 mt-0.5 font-medium truncate">Order <strong>#{{ order.order_number }}</strong> • Placed at {{ order.created_at|date:"h:i A" }}</p>
                 </div>
             </div>
 
-            <div class="text-left sm:text-right border-t sm:border-t-0 border-white/20 pt-3 sm:pt-0">
-                <div class="text-xs text-emerald-100">Total Amount</div>
-                <div class="text-2xl font-black">₹{{ order.grand_total|floatformat:0 }}</div>
-                <div class="text-[11px] font-bold text-emerald-200">
+            <div class="text-left sm:text-right border-t sm:border-t-0 border-white/20 pt-2 sm:pt-0 flex sm:flex-col justify-between sm:justify-start items-baseline sm:items-end">
+                <div>
+                    <div class="text-[10px] sm:text-xs text-emerald-100">Total Amount</div>
+                    <div class="text-xl sm:text-2xl font-black">₹{{ order.grand_total|floatformat:0 }}</div>
+                </div>
+                <div class="text-[10px] sm:text-[11px] font-bold text-emerald-200">
                     {% if order.payment_method == 'COD' %}Cash on Delivery (Pending){% else %}Paid via {{ order.payment_method }}{% endif %}
                 </div>
             </div>
@@ -74,20 +97,22 @@
 
         <!-- 4-Step Visual Progress Stepper (Hidden if Cancelled) -->
         {% if order.status != 'CANCELLED' %}
-        <div class="p-6 sm:p-8 bg-[#F4F6FB] border-b border-gray-200/80">
+        <div class="p-4 sm:p-8 bg-[#F4F6FB] border-b border-gray-200/80">
             <div class="relative">
-                
+
                 <!-- Connector Line -->
                 <div class="hidden sm:block absolute top-1/2 left-0 right-0 h-1 bg-gray-200 -translate-y-1/2 z-0"></div>
-                <div id="progress-bar-fill" class="hidden sm:block absolute top-1/2 left-0 h-1 bg-emerald-500 -translate-y-1/2 z-0 transition-all duration-500"
-                     style="width: {% if order.tracking_step == 1 %}15%{% elif order.tracking_step == 2 %}50%{% elif order.tracking_step == 3 %}80%{% elif order.tracking_step == 4 %}100%{% else %}0%{% endif %};">
+                <div id="progress-bar-fill"
+                    class="hidden sm:block absolute top-1/2 left-0 h-1 bg-emerald-500 -translate-y-1/2 z-0 transition-all duration-500"
+                    style="width: {% if order.tracking_step == 1 %}15%{% elif order.tracking_step == 2 %}50%{% elif order.tracking_step == 3 %}80%{% elif order.tracking_step == 4 %}100%{% else %}0%{% endif %};">
                 </div>
 
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 relative z-10">
-                    
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 relative z-10">
+
                     <!-- Step 1: Order Placed -->
-                    <div class="text-center space-y-2">
-                        <div class="w-10 h-10 rounded-2xl mx-auto flex items-center justify-center font-black text-sm shadow-md {% if order.tracking_step >= 1 %}bg-emerald-600 text-white{% else %}bg-gray-200 text-gray-500{% endif %}">
+                    <div class="text-center space-y-1.5 sm:space-y-2">
+                        <div
+                            class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl mx-auto flex items-center justify-center font-black text-xs sm:text-sm shadow-md {% if order.tracking_step >= 1 %}bg-emerald-600 text-white{% else %}bg-gray-200 text-gray-500{% endif %}">
                             <i class="fa-solid fa-receipt"></i>
                         </div>
                         <div>
@@ -97,8 +122,9 @@
                     </div>
 
                     <!-- Step 2: Packing at Dark Store -->
-                    <div class="text-center space-y-2">
-                        <div class="w-10 h-10 rounded-2xl mx-auto flex items-center justify-center font-black text-sm shadow-md {% if order.tracking_step >= 2 %}bg-emerald-600 text-white{% else %}bg-gray-200 text-gray-500{% endif %}">
+                    <div class="text-center space-y-1.5 sm:space-y-2">
+                        <div
+                            class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl mx-auto flex items-center justify-center font-black text-xs sm:text-sm shadow-md {% if order.tracking_step >= 2 %}bg-emerald-600 text-white{% else %}bg-gray-200 text-gray-500{% endif %}">
                             <i class="fa-solid fa-box-open"></i>
                         </div>
                         <div>
@@ -108,8 +134,9 @@
                     </div>
 
                     <!-- Step 3: Out for Delivery -->
-                    <div class="text-center space-y-2">
-                        <div class="w-10 h-10 rounded-2xl mx-auto flex items-center justify-center font-black text-sm shadow-md {% if order.tracking_step >= 3 %}bg-emerald-600 text-white{% else %}bg-gray-200 text-gray-500{% endif %}">
+                    <div class="text-center space-y-1.5 sm:space-y-2">
+                        <div
+                            class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl mx-auto flex items-center justify-center font-black text-xs sm:text-sm shadow-md {% if order.tracking_step >= 3 %}bg-emerald-600 text-white{% else %}bg-gray-200 text-gray-500{% endif %}">
                             <i class="fa-solid fa-motorcycle"></i>
                         </div>
                         <div>
@@ -119,8 +146,9 @@
                     </div>
 
                     <!-- Step 4: Delivered -->
-                    <div class="text-center space-y-2">
-                        <div class="w-10 h-10 rounded-2xl mx-auto flex items-center justify-center font-black text-sm shadow-md {% if order.tracking_step >= 4 %}bg-emerald-600 text-white{% else %}bg-gray-200 text-gray-500{% endif %}">
+                    <div class="text-center space-y-1.5 sm:space-y-2">
+                        <div
+                            class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl mx-auto flex items-center justify-center font-black text-xs sm:text-sm shadow-md {% if order.tracking_step >= 4 %}bg-emerald-600 text-white{% else %}bg-gray-200 text-gray-500{% endif %}">
                             <i class="fa-solid fa-circle-check"></i>
                         </div>
                         <div>
@@ -134,51 +162,57 @@
         </div>
 
         <!-- Phase 7: Real-Time Live Delivery Map -->
-        <div class="p-6 border-b border-gray-100 space-y-3">
+        <div class="p-4 sm:p-6 border-b border-gray-100 space-y-2.5 sm:space-y-3">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
                     <h3 class="text-xs font-black text-gray-900 uppercase tracking-wider">Live Rider GPS Radar</h3>
                 </div>
-                <span class="text-[10px] font-bold text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-full">
-                    GPS Coordinates Active
+                <span class="text-[9px] sm:text-[10px] font-bold text-gray-500 bg-gray-100 px-2 sm:px-2.5 py-0.5 rounded-full">
+                    GPS Active
                 </span>
             </div>
-            
-            <div id="live-delivery-map" class="w-full h-64 sm:h-72 rounded-2xl border border-gray-200 shadow-inner z-10"></div>
+
+            <div class="relative w-full rounded-2xl border border-gray-200 overflow-hidden shadow-inner bg-slate-50">
+                <div id="live-delivery-map"></div>
+            </div>
         </div>
         {% endif %}
 
         <!-- Store & Delivery Partner Cards -->
-        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-gray-100">
-            
+        <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 border-b border-gray-100">
+
             <!-- Dark Store Hub Card -->
-            <div class="p-4 rounded-2xl bg-[#F4F6FB] border border-gray-200/80 flex items-center gap-3.5">
-                <div class="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-lg font-black shrink-0">
+            <div class="p-3.5 sm:p-4 rounded-2xl bg-[#F4F6FB] border border-gray-200/80 flex items-center gap-3">
+                <div
+                    class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-base sm:text-lg font-black shrink-0">
                     <i class="fa-solid fa-warehouse"></i>
                 </div>
                 <div class="min-w-0">
-                    <div class="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider">Fulfillment Dark Store</div>
+                    <div class="text-[9px] sm:text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider">Fulfillment Dark Store</div>
                     <div class="text-xs font-black text-gray-900 truncate">{{ order.dark_store.name|default:'Koramangala Fulfillment Hub' }}</div>
-                    <div class="text-[11px] text-gray-500 truncate">{{ order.dark_store.address|default:'Hub #01, 80 Feet Road' }}</div>
+                    <div class="text-[10px] sm:text-[11px] text-gray-500 truncate">{{ order.dark_store.address|default:'Hub #01, 80 Feet Road' }}</div>
                 </div>
             </div>
 
             <!-- Delivery Partner Card -->
-            <div class="p-4 rounded-2xl bg-[#F4F6FB] border border-gray-200/80 flex items-center justify-between gap-3">
-                <div class="flex items-center gap-3.5 min-w-0">
-                    <div class="w-11 h-11 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center text-lg font-black shrink-0">
+            <div class="p-3.5 sm:p-4 rounded-2xl bg-[#F4F6FB] border border-gray-200/80 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div
+                        class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center text-base sm:text-lg font-black shrink-0">
                         <i class="fa-solid fa-user-shield"></i>
                     </div>
                     <div class="min-w-0">
-                        <div class="text-[10px] font-extrabold text-blue-800 uppercase tracking-wider">Delivery Partner (⭐ {{ order.rider_rating }})</div>
+                        <div class="text-[9px] sm:text-[10px] font-extrabold text-blue-800 uppercase tracking-wider">Delivery Partner (⭐ {{ order.rider_rating }})</div>
                         <div class="text-xs font-black text-gray-900 truncate" id="rider-name-display">{{ order.rider_name }}</div>
-                        <div class="text-[11px] text-gray-500" id="rider-vehicle-display">{{ order.vehicle_number }} • Vaccinated & Tested</div>
+                        <div class="text-[10px] sm:text-[11px] text-gray-500 truncate" id="rider-vehicle-display">{{ order.vehicle_number }} • Tested</div>
                     </div>
                 </div>
 
-                <a href="tel:{{ order.rider_phone }}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs p-2.5 rounded-xl transition shrink-0 shadow-sm" title="Call Rider">
-                    <i class="fa-solid fa-phone"></i>
+                <a href="tel:{{ order.rider_phone }}"
+                    class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs p-2 sm:p-2.5 rounded-xl transition shrink-0 shadow-sm"
+                    title="Call Rider">
+                    <i class="fa-solid fa-phone text-xs"></i>
                 </a>
             </div>
 
@@ -186,17 +220,18 @@
 
         <!-- Feedback Card if Delivered -->
         {% if order.status == 'DELIVERED' %}
-        <div class="p-6 bg-emerald-50/50 border-b border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div
+            class="p-4 sm:p-6 bg-emerald-50/50 border-b border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-center sm:text-left">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-lg">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-base sm:text-lg shrink-0">
                     <i class="fa-solid fa-star"></i>
                 </div>
                 <div>
-                    <h4 class="text-sm font-black text-emerald-900">How was your 10-minute delivery?</h4>
-                    <p class="text-xs text-emerald-700">Rate your delivery experience with {{ order.rider_name }}</p>
+                    <h4 class="text-xs sm:text-sm font-black text-emerald-900">How was your 10-minute delivery?</h4>
+                    <p class="text-[11px] sm:text-xs text-emerald-700">Rate your delivery experience with {{ order.rider_name }}</p>
                 </div>
             </div>
-            <div class="flex items-center gap-1.5 text-amber-400 text-lg cursor-pointer">
+            <div class="flex items-center gap-1.5 text-amber-400 text-base sm:text-lg cursor-pointer">
                 <i class="fa-solid fa-star hover:scale-125 transition"></i>
                 <i class="fa-solid fa-star hover:scale-125 transition"></i>
                 <i class="fa-solid fa-star hover:scale-125 transition"></i>
@@ -207,23 +242,25 @@
         {% endif %}
 
         <!-- Items Summary List -->
-        <div class="p-6 space-y-4">
+        <div class="p-4 sm:p-6 space-y-3 sm:space-y-4">
             <h3 class="text-xs font-black text-gray-900 uppercase tracking-wider">Items in this Delivery ({{ order.total_item_count }})</h3>
 
             <div class="divide-y divide-gray-100 border border-gray-100 rounded-2xl overflow-hidden">
                 {% for item in items %}
-                <div class="p-3.5 flex items-center justify-between text-xs">
-                    <div class="flex items-center gap-3 min-w-0">
-                        <div class="w-10 h-10 rounded-xl bg-gray-50 p-1 flex items-center justify-center border border-gray-100 shrink-0">
+                <div class="p-3 sm:p-3.5 flex items-center justify-between text-xs gap-2">
+                    <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                        <div
+                            class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gray-50 p-1 flex items-center justify-center border border-gray-100 shrink-0">
                             {% if item.product %}
-                            <img src="{{ item.product.get_image }}" alt="{{ item.product_name }}" class="max-h-full max-w-full object-contain">
+                            <img src="{{ item.product.get_image }}" alt="{{ item.product_name }}"
+                                class="max-h-full max-w-full object-contain">
                             {% else %}
                             <i class="fa-solid fa-box text-gray-400"></i>
                             {% endif %}
                         </div>
                         <div class="min-w-0">
                             <div class="font-bold text-gray-900 truncate">{{ item.product_name }}</div>
-                            <div class="text-[11px] text-gray-500 font-medium">{{ item.unit_quantity }} • Qty: {{ item.quantity }}</div>
+                            <div class="text-[10px] sm:text-[11px] text-gray-500 font-medium">{{ item.unit_quantity }} • Qty: {{ item.quantity }}</div>
                         </div>
                     </div>
                     <div class="font-black text-gray-900 shrink-0">₹{{ item.subtotal|floatformat:0 }}</div>
@@ -232,7 +269,7 @@
             </div>
 
             <!-- Bill Recap -->
-            <div class="bg-[#F4F6FB] p-4 rounded-2xl space-y-2 text-xs">
+            <div class="bg-[#F4F6FB] p-3.5 sm:p-4 rounded-2xl space-y-2 text-xs">
                 <div class="flex justify-between text-gray-600">
                     <span>Items Subtotal</span>
                     <span class="font-bold text-gray-900">₹{{ order.items_total|floatformat:0 }}</span>
@@ -257,33 +294,41 @@
                     <span>+ ₹{{ order.tip_amount|floatformat:0 }}</span>
                 </div>
                 {% endif %}
-                <div class="flex justify-between items-center text-sm font-black text-gray-900 pt-2 border-t border-gray-200">
+                <div
+                    class="flex justify-between items-center text-sm font-black text-gray-900 pt-2 border-t border-gray-200">
                     <span>Total Paid</span>
                     <span class="text-base text-gray-900 font-black">₹{{ order.grand_total|floatformat:0 }}</span>
                 </div>
             </div>
 
-            <div class="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
-                
+            <div class="pt-2 flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-3">
+
                 {% if order.status == 'PLACED' %}
-                <form action="{% url 'orders:cancel' order_number=order.order_number %}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this order? Items will be restocked.');" class="w-full sm:w-auto">
+                <form action="{% url 'orders:cancel' order_number=order.order_number %}" method="POST"
+                    onsubmit="return confirm('Are you sure you want to cancel this order? Items will be restocked.');"
+                    class="w-full sm:w-auto">
                     {% csrf_token %}
-                    <button type="submit" class="w-full sm:w-auto text-center bg-red-50 hover:bg-red-100 text-red-600 font-extrabold text-xs px-5 py-3 rounded-xl transition cursor-pointer">
+                    <button type="submit"
+                        class="w-full sm:w-auto text-center bg-red-50 hover:bg-red-100 text-red-600 font-extrabold text-xs px-5 py-3 rounded-xl transition cursor-pointer">
                         Cancel Order
                     </button>
                 </form>
                 {% else %}
-                <a href="{% url 'products:home' %}" class="w-full sm:w-auto text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-extrabold text-xs px-6 py-3 rounded-xl transition">
+                <a href="{% url 'products:home' %}"
+                    class="w-full sm:w-auto text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-extrabold text-xs px-6 py-3 rounded-xl transition">
                     Continue Shopping
                 </a>
                 {% endif %}
 
                 <div class="flex items-center gap-2 w-full sm:w-auto">
-                    <a href="{% url 'orders:invoice' order_number=order.order_number %}" class="w-full sm:w-auto text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-extrabold text-xs px-4 py-3 rounded-xl transition flex items-center justify-center gap-1.5" title="View Tax Invoice">
+                    <a href="{% url 'orders:invoice' order_number=order.order_number %}"
+                        class="flex-1 sm:flex-initial text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-extrabold text-xs px-4 py-3 rounded-xl transition flex items-center justify-center gap-1.5"
+                        title="View Tax Invoice">
                         <i class="fa-solid fa-file-invoice"></i>
                         <span>Invoice</span>
                     </a>
-                    <a href="{% url 'orders:reorder' order_number=order.order_number %}" class="w-full sm:w-auto text-center bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-6 py-3 rounded-xl transition shadow-md shadow-emerald-600/20">
+                    <a href="{% url 'orders:reorder' order_number=order.order_number %}"
+                        class="flex-1 sm:flex-initial text-center bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-6 py-3 rounded-xl transition shadow-md shadow-emerald-600/20">
                         Re-Order
                     </a>
                 </div>
@@ -296,81 +341,109 @@
 </div>
 
 <!-- Leaflet.js Interactive GPS Radar Map Script -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
-(function() {
-    var orderNumber = "{{ order.order_number }}";
-    var currentStatus = "{{ order.status }}";
-    var mapContainer = document.getElementById('live-delivery-map');
+    document.addEventListener('DOMContentLoaded', function () {
+        var orderNumber = "{{ order.order_number }}";
+        var currentStatus = "{{ order.status }}";
+        var mapContainer = document.getElementById('live-delivery-map');
 
-    if (mapContainer && currentStatus !== 'CANCELLED') {
-        var darkstoreCoords = [{{ order.darkstore_lat|default:12.9352 }}, {{ order.darkstore_lng|default:77.6245 }}];
-        var destCoords = [{{ order.dest_lat|default:12.9390 }}, {{ order.dest_lng|default:77.6290 }}];
-        
-        // Initialize map
-        var map = L.map('live-delivery-map', {
-            zoomControl: false,
-            attributionControl: false
-        }).setView(darkstoreCoords, 15);
+        if (mapContainer && currentStatus !== 'CANCELLED') {
+            var darkstoreLat = parseFloat("{{ order.darkstore_lat|default:'12.9352' }}") || 12.9352;
+            var darkstoreLng = parseFloat("{{ order.darkstore_lng|default:'77.6245' }}") || 77.6245;
+            var destLat = parseFloat("{{ order.dest_lat|default:'12.9390' }}") || 12.9390;
+            var destLng = parseFloat("{{ order.dest_lng|default:'77.6290' }}") || 77.6290;
 
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            maxZoom: 19
-        }).addTo(map);
+            var darkstoreCoords = [darkstoreLat, darkstoreLng];
+            var destCoords = [destLat, destLng];
 
-        // Custom HTML Icons
-        var hubIcon = L.divIcon({
-            className: 'custom-map-pin',
-            html: '<div style="background:#0C831F; color:white; width:34px; height:34px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:16px; border:2px solid white; box-shadow:0 4px 10px rgba(0,0,0,0.3);"><i class="fa-solid fa-warehouse"></i></div>',
-            iconSize: [34, 34],
-            iconAnchor: [17, 17]
-        });
+            // Initialize map with clean zoom controls
+            var map = L.map('live-delivery-map', {
+                zoomControl: true,
+                attributionControl: false
+            }).setView(darkstoreCoords, 15);
 
-        var destIcon = L.divIcon({
-            className: 'custom-map-pin',
-            html: '<div style="background:#E11D48; color:white; width:34px; height:34px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:16px; border:2px solid white; box-shadow:0 4px 10px rgba(0,0,0,0.3);"><i class="fa-solid fa-house-chimney"></i></div>',
-            iconSize: [34, 34],
-            iconAnchor: [17, 17]
-        });
+            L.tileLayer('https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=zYdlbe8fOSl5TLo54SZJ', {
+                tileSize: 512,
+                zoomOffset: -1,
+                minZoom: 1,
+                attribution: '\u003ca href="https://www.maptiler.com/copyright/" target="_blank"\u003e\u0026copy; MapTiler\u003c/a\u003e',
+                crossOrigin: true
+            }).addTo(map);
 
-        var riderIcon = L.divIcon({
-            className: 'custom-map-pin',
-            html: '<div style="background:#2563EB; color:white; width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; border:3px solid white; box-shadow:0 6px 14px rgba(37,99,235,0.5); animation:pulse 2s infinite;"><i class="fa-solid fa-motorcycle"></i></div>',
-            iconSize: [38, 38],
-            iconAnchor: [19, 19]
-        });
+            // Invalidate size on load and resize to prevent blank/grey tiles
+            function refreshMapSize() {
+                if (map) {
+                    map.invalidateSize();
+                }
+            }
+            setTimeout(refreshMapSize, 100);
+            setTimeout(refreshMapSize, 400);
+            setTimeout(refreshMapSize, 1000);
+            window.addEventListener('resize', refreshMapSize);
 
-        // Add static markers & path line
-        var hubMarker = L.marker(darkstoreCoords, { icon: hubIcon }).addTo(map).bindPopup("<b>Fulfillment Hub</b>");
-        var destMarker = L.marker(destCoords, { icon: destIcon }).addTo(map).bindPopup("<b>Delivery Destination</b>");
-        var routePolyline = L.polyline([darkstoreCoords, destCoords], { color: '#0C831F', weight: 4, dashArray: '6, 8', opacity: 0.8 }).addTo(map);
-        
-        var riderMarker = L.marker(darkstoreCoords, { icon: riderIcon }).addTo(map).bindPopup("<b>Rider Location</b>");
+            // Custom HTML Icons
+            var hubIcon = L.divIcon({
+                className: 'custom-map-pin',
+                html: '<div style="background:#0C831F; color:white; width:34px; height:34px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:16px; border:2px solid white; box-shadow:0 4px 10px rgba(0,0,0,0.3);"><i class="fa-solid fa-warehouse"></i></div>',
+                iconSize: [34, 34],
+                iconAnchor: [17, 17],
+                popupAnchor: [0, -18]
+            });
 
-        map.fitBounds(routePolyline.getBounds(), { padding: [40, 40] });
+            var destIcon = L.divIcon({
+                className: 'custom-map-pin',
+                html: '<div style="background:#E11D48; color:white; width:34px; height:34px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:16px; border:2px solid white; box-shadow:0 4px 10px rgba(0,0,0,0.3);"><i class="fa-solid fa-house-chimney"></i></div>',
+                iconSize: [34, 34],
+                iconAnchor: [17, 17],
+                popupAnchor: [0, -18]
+            });
 
-        // 3-Second Live GPS Polling Loop
-        if (currentStatus !== 'DELIVERED') {
-            var locationInterval = setInterval(function() {
-                fetch('/orders/rider-location/' + orderNumber + '/')
-                    .then(function(res) { return res.json(); })
-                    .then(function(data) {
-                        if (data && data.rider_coords) {
-                            riderMarker.setLatLng(data.rider_coords);
-                            if (data.eta_minutes !== undefined) {
-                                var etaEl = document.getElementById('live-eta-mins');
-                                if (etaEl) etaEl.innerText = data.eta_minutes;
+            var riderIcon = L.divIcon({
+                className: 'custom-map-pin',
+                html: '<div style="background:#2563EB; color:white; width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; border:3px solid white; box-shadow:0 6px 14px rgba(37,99,235,0.5);"><i class="fa-solid fa-motorcycle"></i></div>',
+                iconSize: [38, 38],
+                iconAnchor: [19, 19],
+                popupAnchor: [0, -20]
+            });
+
+            // Add static markers & path line
+            var hubMarker = L.marker(darkstoreCoords, { icon: hubIcon }).addTo(map).bindPopup("<b>Fulfillment Hub</b>");
+            var destMarker = L.marker(destCoords, { icon: destIcon }).addTo(map).bindPopup("<b>Delivery Destination</b>");
+            var routePolyline = L.polyline([darkstoreCoords, destCoords], { color: '#0C831F', weight: 4, dashArray: '6, 8', opacity: 0.85 }).addTo(map);
+
+            var riderMarker = L.marker(darkstoreCoords, { icon: riderIcon }).addTo(map).bindPopup("<b>Rider Location</b>");
+
+            try {
+                map.fitBounds(routePolyline.getBounds(), { padding: [40, 40] });
+            } catch (e) {
+                console.warn('Could not fit bounds on polyline', e);
+            }
+
+            // 3-Second Live GPS Polling Loop
+            if (currentStatus !== 'DELIVERED') {
+                var locationInterval = setInterval(function () {
+                    fetch('/orders/rider-location/' + orderNumber + '/')
+                        .then(function (res) { return res.json(); })
+                        .then(function (data) {
+                            if (data && data.rider_coords) {
+                                riderMarker.setLatLng(data.rider_coords);
+                                if (data.eta_minutes !== undefined) {
+                                    var etaEl = document.getElementById('live-eta-mins');
+                                    if (etaEl) etaEl.innerText = data.eta_minutes;
+                                }
+                                if (data.order_status && data.order_status !== currentStatus) {
+                                    window.location.reload();
+                                }
                             }
-                            if (data.order_status && data.order_status !== currentStatus) {
-                                window.location.reload();
-                            }
-                        }
-                    })
-                    .catch(function(err) {
-                        console.log('GPS polling error', err);
-                    });
-            }, 3000);
+                        })
+                        .catch(function (err) {
+                            console.log('GPS polling error', err);
+                        });
+                }, 3000);
+            }
         }
-    }
-})();
+    });
 </script>
 {% endblock %}

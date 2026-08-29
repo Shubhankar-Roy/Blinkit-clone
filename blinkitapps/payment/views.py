@@ -98,7 +98,7 @@ def order_payment(request, order_number):
         'user_email': order.user.email if order.user and order.user.email else 'customer@blinkitclone.local',
         'user_phone': order.phone or (order.user.phone_number if order.user else '9876543210'),
     }
-    return render(request, 'payments/razorpay_pay.html', context)
+    return render(request, 'payment/razorpay_pay.html', context)
 
 
 @csrf_exempt

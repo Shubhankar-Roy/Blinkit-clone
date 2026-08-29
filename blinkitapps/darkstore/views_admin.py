@@ -251,6 +251,20 @@ def admin_darkstore_toggle_status(request, store_id):
 
 
 @admin_or_staff_required
+def admin_darkstore_delete(request, store_id):
+    """
+    Deletes a dark store hub.
+    """
+    if request.method == "POST":
+        store = get_object_or_404(DarkStore, id=store_id)
+        name = store.name
+        store.delete()
+        messages.success(request, f"Dark Store '{name}' deleted successfully.")
+    return redirect('darkstore_admin:list')
+
+
+
+@admin_or_staff_required
 def admin_darkstore_inventory(request, store_id):
     """
     Dedicated store-level inventory matrix allowing direct stock quantity adjustments,

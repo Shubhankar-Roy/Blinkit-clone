@@ -1,82 +1,82 @@
 <header class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
-    <div class="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between gap-3 md:gap-6">
+    <div class="max-w-7xl mx-auto px-3 sm:px-4 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4 md:gap-6">
         
         <!-- Brand Logo -->
         <a href="{% url 'products:home' %}" class="flex items-center gap-1 shrink-0">
-            <span class="text-3xl md:text-4xl font-black tracking-tight text-blinkit-yellow">blink<span class="text-blinkit-green">it</span></span>
+            <span class="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-blinkit-yellow">blink<span class="text-blinkit-green">it</span></span>
         </a>
 
         <!-- Fast Delivery & Location Pill (Opens Location Selection Modal) -->
-        <label for="location-modal-toggle" class="border-l border-gray-200 pl-3 md:pl-5 py-1 text-left shrink-0 cursor-pointer group hover:opacity-90 transition">
-            <div class="text-[13px] font-black text-gray-900 flex items-center gap-1.5">
-                <i class="fa-solid fa-bolt text-blinkit-green group-hover:scale-110 transition-transform"></i>
-                <span>Delivery in {{ request.session.eta_mins|default:10 }} minutes</span>
+        <label for="location-modal-toggle" class="border-l border-gray-200 pl-2 sm:pl-4 py-1 text-left shrink-0 cursor-pointer group hover:opacity-90 transition max-w-[140px] xs:max-w-[180px] sm:max-w-[220px] md:max-w-none">
+            <div class="text-[11px] sm:text-[13px] font-black text-gray-900 flex items-center gap-1 sm:gap-1.5 truncate">
+                <i class="fa-solid fa-bolt text-blinkit-green text-xs group-hover:scale-110 transition-transform shrink-0"></i>
+                <span class="truncate">Delivery in {{ request.session.eta_mins|default:10 }} mins</span>
             </div>
-            <div class="text-xs text-gray-600 flex items-center gap-1 font-medium group-hover:text-blinkit-green transition-colors">
-                <i class="fa-solid fa-location-dot text-blinkit-green text-xs"></i>
-                <span class="max-w-[140px] md:max-w-[200px] truncate">{{ request.session.location_name|default:'Koramangala, Bengaluru' }}</span>
-                <i class="fa-solid fa-chevron-down text-[10px] text-gray-400 group-hover:text-blinkit-green ml-0.5"></i>
+            <div class="text-[10px] sm:text-xs text-gray-600 flex items-center gap-1 font-medium group-hover:text-blinkit-green transition-colors">
+                <i class="fa-solid fa-location-dot text-blinkit-green text-[10px] sm:text-xs shrink-0"></i>
+                <span class="truncate">{{ request.session.location_name|default:'Koramangala, Bengaluru' }}</span>
+                <i class="fa-solid fa-chevron-down text-[8px] sm:text-[10px] text-gray-400 group-hover:text-blinkit-green ml-0.5 shrink-0"></i>
             </div>
         </label>
 
-        <!-- Search Bar -->
-        <form action="{% url 'products:search' %}" method="GET" class="flex-1 max-w-xl relative hidden sm:block">
+        <!-- Search Bar (Tablet & Desktop) -->
+        <form action="{% url 'products:search' %}" method="GET" class="flex-1 max-w-xl relative hidden md:block">
             <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
             <input type="text" name="q" value="{{ request.GET.q|default:'' }}" 
                    placeholder='Search "milk", "bread", "chips" or "paneer"' 
-                   class="w-full bg-[#F4F6FB] text-sm rounded-xl pl-11 pr-4 py-3 border border-transparent focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition">
+                   class="w-full bg-[#F4F6FB] text-sm rounded-xl pl-11 pr-4 py-2.5 sm:py-3 border border-transparent focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition">
         </form>
 
         <!-- User Controls / Auth Links, Admin Dashboard & Cart Action -->
-        <div class="flex items-center gap-2.5 md:gap-3 shrink-0">
+        <div class="flex items-center gap-1.5 sm:gap-2.5 md:gap-3 shrink-0">
             
             <!-- Staff / Admin Dark Store Engine Quick Link -->
             {% if request.user.is_authenticated and request.user.is_staff or request.user.is_superuser %}
             <a href="{% url 'darkstore_admin:dashboard' %}" 
-               class="flex items-center gap-1.5 bg-emerald-900 hover:bg-black text-emerald-300 hover:text-white text-xs font-black px-3 py-2 rounded-xl transition shadow-sm"
+               class="flex items-center gap-1.5 bg-emerald-900 hover:bg-black text-emerald-300 hover:text-white text-[11px] sm:text-xs font-black px-2.5 sm:px-3 py-2 rounded-xl transition shadow-sm"
                title="Open Location & Dark Store Admin Engine">
                 <i class="fa-solid fa-warehouse text-emerald-400"></i>
-                <span class="hidden md:inline">Dark Store Hub</span>
+                <span class="hidden lg:inline">Hub</span>
             </a>
             {% endif %}
 
             {% if request.user.is_authenticated %}
-            <a href="{% url 'orders:history' %}" class="hidden sm:flex items-center gap-1.5 text-xs font-bold text-gray-700 hover:text-blinkit-green bg-gray-100/70 hover:bg-emerald-50 px-3 py-2.5 rounded-xl transition">
+            <a href="{% url 'orders:history' %}" class="hidden sm:flex items-center gap-1.5 text-xs font-bold text-gray-700 hover:text-blinkit-green bg-gray-100/70 hover:bg-emerald-50 px-2.5 sm:px-3 py-2 rounded-xl transition">
                 <i class="fa-solid fa-bag-shopping text-emerald-600"></i>
                 <span>Orders</span>
             </a>
-            <a href="{% url 'accounts:profile' %}" class="flex items-center gap-2 bg-gray-100 hover:bg-emerald-50 hover:text-blinkit-green text-gray-800 text-sm font-bold px-3 py-2.5 rounded-xl transition">
+            <a href="{% url 'accounts:profile' %}" class="flex items-center gap-1.5 sm:gap-2 bg-gray-100 hover:bg-emerald-50 hover:text-blinkit-green text-gray-800 text-xs sm:text-sm font-bold px-2.5 sm:px-3 py-2 rounded-xl transition">
                 <i class="fa-regular fa-user text-blinkit-green"></i>
-                <span class="max-w-[80px] md:max-w-[120px] truncate">{{ request.user.display_name }}</span>
+                <span class="max-w-[60px] sm:max-w-[100px] md:max-w-[120px] truncate">{{ request.user.display_name|default:request.user.username }}</span>
             </a>
-            <a href="{% url 'accounts:logout' %}" class="text-xs font-bold text-gray-500 hover:text-red-600 transition px-1.5 py-1 hidden sm:block" title="Logout">
+            <a href="{% url 'accounts:logout' %}" class="text-xs font-bold text-gray-500 hover:text-red-600 transition p-1.5 hidden sm:block" title="Logout">
                 <i class="fa-solid fa-right-from-bracket"></i>
             </a>
             {% else %}
-            <a href="{% url 'accounts:login' %}" class="text-gray-800 hover:text-blinkit-green text-sm font-extrabold px-3 py-2 transition">
+            <a href="{% url 'accounts:login' %}" class="text-gray-800 hover:text-blinkit-green text-xs sm:text-sm font-extrabold px-2 sm:px-3 py-2 transition">
                 Log In
             </a>
-            <a href="{% url 'accounts:register' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-extrabold px-3 py-2.5 rounded-xl transition hidden sm:inline-block">
+            <a href="{% url 'accounts:register' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-extrabold px-3 py-2 rounded-xl transition hidden sm:inline-block">
                 Sign Up
             </a>
             {% endif %}
 
             <!-- My Cart Button -->
-            <a href="{% url 'cart:detail' %}" class="bg-blinkit-green hover:bg-blinkit-darkgreen text-white font-extrabold px-4 sm:px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-sm hover:shadow transition select-none">
-                <i class="fa-solid fa-cart-shopping text-sm"></i>
+            <a href="{% url 'cart:detail' %}" class="bg-blinkit-green hover:bg-blinkit-darkgreen text-white font-extrabold px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl flex items-center gap-1.5 sm:gap-2 shadow-sm hover:shadow transition select-none shrink-0">
+                <i class="fa-solid fa-cart-shopping text-xs sm:text-sm"></i>
                 <span class="text-xs sm:text-sm font-bold">My Cart</span>
             </a>
         </div>
 
     </div>
 
-    <!-- Mobile Search Bar (Below header on small devices) -->
-    <div class="px-4 pb-3 sm:hidden">
+    <!-- Mobile / Tablet Search Bar (Below header on smaller screens) -->
+    <div class="px-3 sm:px-4 pb-2.5 md:hidden">
         <form action="{% url 'products:search' %}" method="GET" class="relative">
-            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs sm:text-sm"></i>
             <input type="text" name="q" value="{{ request.GET.q|default:'' }}" 
                    placeholder='Search "milk", "bread", "chips"...' 
-                   class="w-full bg-[#F4F6FB] text-sm rounded-xl pl-11 pr-4 py-2.5 border border-transparent focus:border-emerald-500 focus:bg-white focus:outline-none transition">
+                   class="w-full bg-[#F4F6FB] text-xs sm:text-sm rounded-xl pl-9 sm:pl-10 pr-4 py-2 sm:py-2.5 border border-transparent focus:border-emerald-500 focus:bg-white focus:outline-none transition">
         </form>
     </div>
 </header>

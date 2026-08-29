@@ -27,8 +27,6 @@ class DarkStore(models.Model):
 
     class Meta:
         ordering = ['name']
-        verbose_name = "Dark Store"
-        verbose_name_plural = "Dark Stores"
 
     def is_pincode_serviceable(self, pincode):
         if not pincode:
@@ -82,8 +80,6 @@ class DarkStoreInventory(models.Model):
     class Meta:
         unique_together = ('dark_store', 'product')
         ordering = ['dark_store', 'product__name']
-        verbose_name = "Dark Store Inventory"
-        verbose_name_plural = "Dark Store Inventories"
 
     @property
     def is_low_stock(self):

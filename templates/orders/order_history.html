@@ -3,83 +3,83 @@
 {% block title %}My Orders - Blinkit Clone{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 py-8 space-y-6">
+<div class="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-8 space-y-4 sm:space-y-6">
     
     <!-- Breadcrumb -->
-    <div class="flex items-center gap-2 text-xs text-gray-400 font-bold uppercase tracking-wider">
+    <div class="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-gray-400 font-bold uppercase tracking-wider overflow-x-auto whitespace-nowrap pb-1">
         <a href="{% url 'products:home' %}" class="hover:text-blinkit-green">Home</a>
-        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        <i class="fa-solid fa-chevron-right text-[8px] sm:text-[10px]"></i>
         <a href="{% url 'accounts:profile' %}" class="hover:text-blinkit-green">My Account</a>
-        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        <i class="fa-solid fa-chevron-right text-[8px] sm:text-[10px]"></i>
         <span class="text-gray-900">Order History</span>
     </div>
 
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-            <h1 class="text-2xl font-black text-gray-900 tracking-tight">Your Past Orders</h1>
-            <p class="text-xs text-gray-500 font-medium mt-0.5">Track live deliveries and re-order your favorite grocery essentials.</p>
+            <h1 class="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">Your Past Orders</h1>
+            <p class="text-[11px] sm:text-xs text-gray-500 font-medium mt-0.5">Track live deliveries and re-order your favorite grocery essentials.</p>
         </div>
-        <span class="bg-emerald-50 text-emerald-800 text-xs font-black px-3 py-1 rounded-full border border-emerald-100">
+        <span class="self-start sm:self-auto bg-emerald-50 text-emerald-800 text-[11px] sm:text-xs font-black px-2.5 sm:px-3 py-1 rounded-full border border-emerald-100">
             {{ orders.count }} Order{{ orders.count|pluralize }}
         </span>
     </div>
 
     <!-- Orders List -->
-    <div class="space-y-4">
+    <div class="space-y-3 sm:space-y-4">
         {% for order in orders %}
-        <div class="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm space-y-4 hover:border-gray-300 transition">
+        <div class="bg-white rounded-2xl sm:rounded-3xl border border-gray-200 p-4 sm:p-6 shadow-sm space-y-3 sm:space-y-4 hover:border-gray-300 transition">
             
             <!-- Top Header -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-3">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-black text-base">
+                <div class="flex items-center gap-2.5 sm:gap-3">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-black text-sm sm:text-base shrink-0">
                         <i class="fa-solid fa-bag-shopping"></i>
                     </div>
                     <div>
-                        <div class="text-sm font-black text-gray-900">Order #{{ order.order_number }}</div>
-                        <div class="text-[11px] text-gray-400 font-medium">Placed on {{ order.created_at|date:"M d, Y • h:i A" }}</div>
+                        <div class="text-xs sm:text-sm font-black text-gray-900">Order #{{ order.order_number }}</div>
+                        <div class="text-[10px] sm:text-[11px] text-gray-400 font-medium">Placed on {{ order.created_at|date:"M d, Y • h:i A" }}</div>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2">
-                    <span class="text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider {% if order.status == 'DELIVERED' %}bg-emerald-100 text-emerald-800{% elif order.status == 'CANCELLED' %}bg-red-100 text-red-800{% else %}bg-blue-100 text-blue-800 animate-pulse{% endif %}">
+                <div class="flex items-center justify-between sm:justify-end gap-2 pt-1 sm:pt-0">
+                    <span class="text-[9px] sm:text-[10px] font-black px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full uppercase tracking-wider {% if order.status == 'DELIVERED' %}bg-emerald-100 text-emerald-800{% elif order.status == 'CANCELLED' %}bg-red-100 text-red-800{% else %}bg-blue-100 text-blue-800 animate-pulse{% endif %}">
                         {{ order.get_status_display }}
                     </span>
-                    <span class="text-sm font-black text-gray-900">₹{{ order.grand_total|floatformat:0 }}</span>
+                    <span class="text-xs sm:text-sm font-black text-gray-900">₹{{ order.grand_total|floatformat:0 }}</span>
                 </div>
             </div>
 
             <!-- Items Snippet -->
-            <div class="space-y-2">
-                <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Items in Order</div>
-                <div class="flex flex-wrap gap-2">
+            <div class="space-y-1.5 sm:space-y-2">
+                <div class="text-[10px] sm:text-[11px] font-bold text-gray-500 uppercase tracking-wider">Items in Order</div>
+                <div class="flex flex-wrap gap-1.5 sm:gap-2">
                     {% for item in order.items.all %}
-                    <span class="bg-[#F4F6FB] border border-gray-200/60 text-gray-800 text-xs font-semibold px-2.5 py-1 rounded-xl flex items-center gap-1.5">
+                    <span class="bg-[#F4F6FB] border border-gray-200/60 text-gray-800 text-[11px] sm:text-xs font-semibold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-xl flex items-center gap-1 sm:gap-1.5">
                         <span class="font-extrabold text-emerald-700">{{ item.quantity }}x</span>
-                        <span class="truncate max-w-[180px]">{{ item.product_name }}</span>
+                        <span class="truncate max-w-[130px] sm:max-w-[180px]">{{ item.product_name }}</span>
                     </span>
                     {% endfor %}
                 </div>
             </div>
 
             <!-- Address & Action Buttons -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-gray-100 text-xs">
-                <div class="text-gray-500 truncate max-w-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 pt-2 border-t border-gray-100 text-xs">
+                <div class="text-gray-500 truncate max-w-sm text-[11px] sm:text-xs">
                     <i class="fa-solid fa-location-dot text-gray-400 mr-1"></i>
                     <span>{{ order.delivery_address }}</span>
                 </div>
 
-                <div class="flex items-center gap-2">
-                    <a href="{% url 'orders:invoice' order_number=order.order_number %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-3 py-2 rounded-xl transition flex items-center gap-1.5" title="View Tax Invoice">
-                        <i class="fa-solid fa-file-invoice"></i>
+                <div class="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
+                    <a href="{% url 'orders:invoice' order_number=order.order_number %}" class="flex-1 sm:flex-initial justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl transition flex items-center gap-1 sm:gap-1.5 text-xs" title="View Tax Invoice">
+                        <i class="fa-solid fa-file-invoice text-xs"></i>
                         <span>Invoice</span>
                     </a>
-                    <a href="{% url 'orders:track' order_number=order.order_number %}" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-extrabold px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 border border-emerald-200">
-                        <i class="fa-solid fa-map-location-dot"></i>
+                    <a href="{% url 'orders:track' order_number=order.order_number %}" class="flex-1 sm:flex-initial justify-center bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-extrabold px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl transition flex items-center gap-1 sm:gap-1.5 border border-emerald-200 text-xs">
+                        <i class="fa-solid fa-map-location-dot text-xs"></i>
                         <span>Track</span>
                     </a>
-                    <a href="{% url 'orders:reorder' order_number=order.order_number %}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm shadow-emerald-600/20">
-                        <i class="fa-solid fa-rotate-right"></i>
+                    <a href="{% url 'orders:reorder' order_number=order.order_number %}" class="flex-1 sm:flex-initial justify-center bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl transition flex items-center gap-1 sm:gap-1.5 shadow-sm shadow-emerald-600/20 text-xs">
+                        <i class="fa-solid fa-rotate-right text-xs"></i>
                         <span>Re-Order</span>
                     </a>
                 </div>
@@ -87,15 +87,15 @@
 
         </div>
         {% empty %}
-        <div class="bg-white rounded-3xl border border-gray-200 p-12 text-center max-w-md mx-auto space-y-4">
-            <div class="w-20 h-20 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-3xl mx-auto">
+        <div class="bg-white rounded-2xl sm:rounded-3xl border border-gray-200 p-8 sm:p-12 text-center max-w-md mx-auto space-y-3 sm:space-y-4">
+            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl sm:text-3xl mx-auto">
                 <i class="fa-solid fa-receipt"></i>
             </div>
             <div class="space-y-1">
                 <h3 class="text-base font-black text-gray-900">No Orders Yet</h3>
                 <p class="text-xs text-gray-500">You haven't placed any 10-minute grocery orders yet.</p>
             </div>
-            <a href="{% url 'products:home' %}" class="inline-block bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-6 py-3 rounded-2xl shadow transition">
+            <a href="{% url 'products:home' %}" class="inline-block bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-5 sm:px-6 py-2.5 sm:py-3 rounded-2xl shadow transition">
                 Start Shopping
             </a>
         </div>

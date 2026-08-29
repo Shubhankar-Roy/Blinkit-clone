@@ -34,6 +34,8 @@
     
     <!-- FontAwesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    {% block extra_head %}{% endblock %}
 </head>
 <body class="bg-[#F4F6FB] text-gray-800 font-sans flex flex-col min-h-screen antialiased selection:bg-emerald-200 selection:text-emerald-900">
 
@@ -70,5 +72,6 @@
     <!-- Blinkit Footer -->
     {% include 'components/footer.html' %}
 
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

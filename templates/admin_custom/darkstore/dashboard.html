@@ -132,15 +132,21 @@
 
     <!-- Dark Stores Fleet Overview Grid -->
     <div>
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div>
                 <h2 class="text-lg font-black text-gray-900 tracking-tight">Dark Store Network Fleet</h2>
                 <p class="text-xs text-gray-500 font-medium">Real-time health status, stock levels, and service area per fulfillment hub.</p>
             </div>
-            <a href="{% url 'darkstore_admin:list' %}" class="text-xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1">
-                <span>View Full Table</span>
-                <i class="fa-solid fa-arrow-right text-[10px]"></i>
-            </a>
+            <div class="flex items-center gap-2">
+                <a href="{% url 'darkstore_admin:create' %}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm shadow-emerald-600/20">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Add Dark Store</span>
+                </a>
+                <a href="{% url 'darkstore_admin:list' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1">
+                    <span>View Full Table</span>
+                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -237,10 +243,18 @@
                         <i class="fa-solid fa-pen-to-square"></i>
                     </a>
                     <a href="{% url 'darkstore_admin:toggle' store_id=item.store.id %}" 
-                       class="{% if item.store.is_active %}bg-red-50 hover:bg-red-100 text-red-700{% else %}bg-emerald-50 hover:bg-emerald-100 text-emerald-700{% endif %} font-bold text-xs p-2 rounded-xl transition"
+                       class="{% if item.store.is_active %}bg-amber-50 hover:bg-amber-100 text-amber-700{% else %}bg-emerald-50 hover:bg-emerald-100 text-emerald-700{% endif %} font-bold text-xs p-2 rounded-xl transition"
                        title="{% if item.store.is_active %}Close Store{% else %}Open Store{% endif %}">
                         <i class="fa-solid {% if item.store.is_active %}fa-power-off{% else %}fa-play{% endif %}"></i>
                     </a>
+                    <form action="{% url 'darkstore_admin:delete' store_id=item.store.id %}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to permanently delete dark store \'{{ item.store.name|escapejs }}\'? This will also remove its associated inventory records.');">
+                        {% csrf_token %}
+                        <button type="submit" 
+                                class="bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs p-2 rounded-xl transition cursor-pointer" 
+                                title="Delete Dark Store">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </form>
                 </div>
 
             </div>

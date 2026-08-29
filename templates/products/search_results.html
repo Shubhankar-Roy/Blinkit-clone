@@ -3,28 +3,28 @@
 {% block title %}{% if query %}Search results for "{{ query }}"{% else %}Search Grocery Catalog{% endif %} - Blinkit Clone{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+<div class="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
 
     <!-- Search Header & Refinement Bar -->
-    <div class="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div class="bg-white rounded-2xl sm:rounded-3xl border border-gray-200 p-4 sm:p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4">
         <div>
-            <div class="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+            <div class="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
                 <a href="{% url 'products:home' %}" class="hover:text-blinkit-green">Home</a>
-                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                <i class="fa-solid fa-chevron-right text-[8px] sm:text-[10px]"></i>
                 <span class="text-gray-900">Search Results</span>
             </div>
-            <h1 class="text-xl md:text-2xl font-black text-gray-900">
+            <h1 class="text-lg sm:text-xl md:text-2xl font-black text-gray-900">
                 {% if query %}
                 Results for "<span class="text-blinkit-green">{{ query }}</span>"
                 {% else %}
                 Explore All Products
                 {% endif %}
             </h1>
-            <p class="text-xs text-gray-500 mt-0.5">Found {{ count }} item{{ count|pluralize }} ready for 10-minute instant delivery</p>
+            <p class="text-[11px] sm:text-xs text-gray-500 mt-0.5">Found {{ count }} item{{ count|pluralize }} ready for 10-minute instant delivery</p>
         </div>
 
         <!-- Sorting Selector -->
-        <div class="flex items-center gap-3 w-full md:w-auto">
+        <div class="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 w-full md:w-auto pt-2 md:pt-0 border-t md:border-t-0 border-gray-100">
             <span class="text-xs font-bold text-gray-500 shrink-0">Sort By:</span>
             <select onchange="window.location.href=this.value" 
                     class="bg-[#F4F6FB] text-xs font-black text-gray-800 rounded-xl px-3 py-2 border border-gray-200 focus:border-emerald-500 focus:outline-none cursor-pointer">
@@ -49,14 +49,14 @@
 
     <!-- Category Filter Chips -->
     {% if categories %}
-    <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+    <div class="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-none">
         <a href="?q={{ query }}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}" 
-           class="px-3.5 py-2 rounded-xl text-xs font-black shrink-0 transition {% if not selected_category %}bg-slate-900 text-white shadow-sm{% else %}bg-white text-gray-700 hover:bg-gray-100 border border-gray-200{% endif %}">
+           class="px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-black shrink-0 transition {% if not selected_category %}bg-slate-900 text-white shadow-sm{% else %}bg-white text-gray-700 hover:bg-gray-100 border border-gray-200{% endif %}">
             All Categories
         </a>
         {% for cat in categories %}
         <a href="?q={{ query }}&category={{ cat.id }}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}" 
-           class="px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 transition flex items-center gap-1.5 {% if selected_category == cat.id %}bg-blinkit-green text-white shadow-sm{% else %}bg-white text-gray-700 hover:bg-gray-100 border border-gray-200{% endif %}">
+           class="px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-bold shrink-0 transition flex items-center gap-1.5 {% if selected_category == cat.id %}bg-blinkit-green text-white shadow-sm{% else %}bg-white text-gray-700 hover:bg-gray-100 border border-gray-200{% endif %}">
             <img src="{{ cat.get_image }}" alt="{{ cat.name }}" class="w-4 h-4 object-contain">
             <span>{{ cat.name }}</span>
         </a>
@@ -66,19 +66,19 @@
 
     <!-- Products Grid -->
     {% if products %}
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-4">
         {% for product in products %}
             {% include 'components/product_card.html' with product=product %}
         {% endfor %}
     </div>
     {% else %}
     <!-- Empty State -->
-    <div class="bg-white rounded-3xl border border-gray-200 p-10 sm:p-14 text-center max-w-lg mx-auto my-8 space-y-5 shadow-sm">
-        <div class="w-20 h-20 bg-gray-100 rounded-3xl flex items-center justify-center mx-auto text-3xl text-gray-400">
+    <div class="bg-white rounded-2xl sm:rounded-3xl border border-gray-200 p-6 sm:p-14 text-center max-w-lg mx-auto my-6 sm:my-8 space-y-4 sm:space-y-5 shadow-sm">
+        <div class="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto text-2xl sm:text-3xl text-gray-400">
             <i class="fa-solid fa-magnifying-glass"></i>
         </div>
         <div>
-            <h3 class="text-xl font-black text-gray-900">No products found</h3>
+            <h3 class="text-lg sm:text-xl font-black text-gray-900">No products found</h3>
             <p class="text-xs text-gray-500 mt-1 leading-relaxed">
                 We couldn't find matches for "<span class="font-bold text-gray-800">{{ query }}</span>". Try searching for popular everyday staples below.
             </p>
@@ -86,10 +86,10 @@
 
         <!-- Popular Keywords Chips -->
         <div class="pt-2 border-t border-gray-100">
-            <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-3">Popular Searches</div>
-            <div class="flex flex-wrap items-center justify-center gap-2">
+            <div class="text-[10px] sm:text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 sm:mb-3">Popular Searches</div>
+            <div class="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
                 {% for kw in popular_keywords %}
-                <a href="{% url 'products:search' %}?q={{ kw }}" class="bg-[#F4F6FB] hover:bg-emerald-50 hover:text-blinkit-green text-gray-700 text-xs font-bold px-3 py-1.5 rounded-xl transition border border-gray-200/80">
+                <a href="{% url 'products:search' %}?q={{ kw }}" class="bg-[#F4F6FB] hover:bg-emerald-50 hover:text-blinkit-green text-gray-700 text-xs font-bold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl transition border border-gray-200/80">
                     {{ kw }}
                 </a>
                 {% endfor %}
@@ -97,7 +97,7 @@
         </div>
 
         <div class="pt-2">
-            <a href="{% url 'products:home' %}" class="inline-block bg-blinkit-green hover:bg-blinkit-darkgreen text-white text-xs font-extrabold px-6 py-3 rounded-xl transition shadow-md">
+            <a href="{% url 'products:home' %}" class="inline-block bg-blinkit-green hover:bg-blinkit-darkgreen text-white text-xs font-extrabold px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl transition shadow-md">
                 Back to Store Homepage
             </a>
         </div>

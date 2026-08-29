@@ -131,7 +131,6 @@ class DarkStoreInventory(models.Model):
 
     class Meta:
         unique_together = ('dark_store', 'product')
-        verbose_name_plural = "Dark Store Inventories"
 
     def __str__(self):
         return f"{self.product.name} at {self.dark_store.name}: {self.stock_quantity} units"
@@ -151,7 +150,6 @@ class Category(models.Model):
 
     class Meta:
         ordering = ['display_order', 'name']
-        verbose_name_plural = "Categories"
 
     def get_image(self):
         if self.image:
@@ -169,7 +167,7 @@ class SubCategory(models.Model):
     slug = models.SlugField(unique=True)
 
     class Meta:
-        verbose_name_plural = "Sub Categories"
+        ordering = ['name']
 
     def __str__(self):
         return f"{self.category.name} -> {self.name}"

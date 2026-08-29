@@ -1,74 +1,74 @@
-<div class="bg-white rounded-2xl border border-gray-200/80 p-3.5 flex flex-col justify-between hover:shadow-lg hover:border-emerald-200 transition-all group relative">
+<div class="bg-white rounded-2xl border border-gray-200/80 p-2.5 sm:p-3.5 flex flex-col justify-between hover:shadow-lg hover:border-emerald-200 transition-all group relative">
     
     <!-- Discount Percentage Badge -->
     {% if product.discount_percentage > 0 %}
-    <div class="absolute top-3 left-3 bg-[#256FEF] text-white font-black text-[10px] tracking-wide px-2 py-0.5 rounded-md shadow-sm z-10">
+    <div class="absolute top-2 left-2 sm:top-3 sm:left-3 bg-[#256FEF] text-white font-black text-[9px] sm:text-[10px] tracking-wide px-1.5 sm:px-2 py-0.5 rounded-md shadow-sm z-10">
         {{ product.discount_percentage }}% OFF
     </div>
     {% endif %}
 
     <!-- Trending / Bestseller Badge -->
     {% if product.is_bestseller %}
-    <div class="absolute top-3 right-3 bg-amber-500 text-white font-black text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded shadow-sm z-10">
+    <div class="absolute top-2 right-2 sm:top-3 sm:right-3 bg-amber-500 text-white font-black text-[8px] sm:text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded shadow-sm z-10">
         Bestseller
     </div>
     {% elif product.is_trending %}
-    <div class="absolute top-3 right-3 bg-rose-500 text-white font-black text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded shadow-sm z-10">
+    <div class="absolute top-2 right-2 sm:top-3 sm:right-3 bg-rose-500 text-white font-black text-[8px] sm:text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded shadow-sm z-10">
         Trending
     </div>
     {% endif %}
 
     <!-- Product Image -->
-    <a href="{% url 'products:detail' product.id %}" class="w-full h-36 flex items-center justify-center p-2 mt-2 group-hover:scale-105 transition-transform duration-200 overflow-hidden rounded-xl">
+    <a href="{% url 'products:detail' product.id %}" class="w-full h-28 sm:h-36 flex items-center justify-center p-1.5 sm:p-2 mt-1 sm:mt-2 group-hover:scale-105 transition-transform duration-200 overflow-hidden rounded-xl">
         <img src="{{ product.get_image }}" alt="{{ product.name }}" class="max-h-full max-w-full object-contain">
     </a>
 
     <!-- Product Details -->
-    <div class="mt-3 space-y-1">
-        <div class="text-[10px] font-extrabold text-gray-700 bg-gray-100/90 px-2 py-0.5 rounded-md w-max flex items-center gap-1">
-            <i class="fa-regular fa-clock text-blinkit-green text-[11px]"></i>
+    <div class="mt-2 sm:mt-3 space-y-1">
+        <div class="text-[9px] sm:text-[10px] font-extrabold text-gray-700 bg-gray-100/90 px-1.5 sm:px-2 py-0.5 rounded-md w-max flex items-center gap-1">
+            <i class="fa-regular fa-clock text-blinkit-green text-[10px] sm:text-[11px]"></i>
             <span>{{ eta_mins|default:product.eta_minutes }} MINS</span>
         </div>
 
-        <a href="{% url 'products:detail' product.id %}" class="block text-xs font-bold text-gray-900 line-clamp-2 min-h-[32px] hover:text-blinkit-green transition-colors">
+        <a href="{% url 'products:detail' product.id %}" class="block text-xs font-bold text-gray-900 line-clamp-2 min-h-[28px] sm:min-h-[32px] hover:text-blinkit-green transition-colors leading-tight sm:leading-normal">
             {{ product.name }}
         </a>
 
-        <p class="text-[11px] text-gray-500 font-semibold">{{ product.unit_quantity }}</p>
+        <p class="text-[10px] sm:text-[11px] text-gray-500 font-semibold">{{ product.unit_quantity }}</p>
     </div>
 
     <!-- Pricing & Action Button -->
-    <div class="mt-3 flex items-center justify-between pt-2.5 border-t border-gray-100">
-        <div>
-            <div class="text-sm font-black text-gray-900">₹{{ product.selling_price|floatformat:0 }}</div>
+    <div class="mt-2 sm:mt-3 flex items-center justify-between pt-2 sm:pt-2.5 border-t border-gray-100 gap-1">
+        <div class="min-w-0">
+            <div class="text-xs sm:text-sm font-black text-gray-900 truncate">₹{{ product.selling_price|floatformat:0 }}</div>
             {% if product.discount_percentage > 0 %}
-            <div class="text-[10px] text-gray-400 line-through font-medium">₹{{ product.mrp|floatformat:0 }}</div>
+            <div class="text-[9px] sm:text-[10px] text-gray-400 line-through font-medium truncate">₹{{ product.mrp|floatformat:0 }}</div>
             {% endif %}
         </div>
 
-        <div>
+        <div class="shrink-0">
             {% if product.is_out_of_stock or not product.is_active %}
-                <span class="border border-gray-200 text-gray-400 bg-gray-100 font-bold px-2.5 py-1.5 rounded-xl text-[10px] uppercase select-none inline-block">
-                    OUT OF STOCK
+                <span class="border border-gray-200 text-gray-400 bg-gray-100 font-bold px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] uppercase select-none inline-block">
+                    OOS
                 </span>
             {% else %}
                 {% if product.in_cart_qty > 0 %}
                 <!-- In-Cart Quantity Stepper -->
-                <div class="flex items-center bg-blinkit-green text-white font-bold rounded-xl overflow-hidden shadow-sm">
+                <div class="flex items-center bg-blinkit-green text-white font-bold rounded-lg sm:rounded-xl overflow-hidden shadow-sm">
                     <form action="{% url 'cart:update' %}" method="POST" class="inline">
                         {% csrf_token %}
                         <input type="hidden" name="product_id" value="{{ product.id }}">
                         <input type="hidden" name="action" value="remove">
-                        <button type="submit" class="px-2.5 py-1 hover:bg-blinkit-darkgreen text-xs font-black transition cursor-pointer" title="Decrease">-</button>
+                        <button type="submit" class="px-1.5 sm:px-2.5 py-1 hover:bg-blinkit-darkgreen text-xs font-black transition cursor-pointer" title="Decrease">-</button>
                     </form>
                     
-                    <span class="px-2 py-0.5 text-xs font-extrabold select-none">{{ product.in_cart_qty }}</span>
+                    <span class="px-1.5 sm:px-2 py-0.5 text-xs font-extrabold select-none">{{ product.in_cart_qty }}</span>
                     
                     <form action="{% url 'cart:update' %}" method="POST" class="inline">
                         {% csrf_token %}
                         <input type="hidden" name="product_id" value="{{ product.id }}">
                         <input type="hidden" name="action" value="add">
-                        <button type="submit" class="px-2.5 py-1 hover:bg-blinkit-darkgreen text-xs font-black transition cursor-pointer" title="Increase">+</button>
+                        <button type="submit" class="px-1.5 sm:px-2.5 py-1 hover:bg-blinkit-darkgreen text-xs font-black transition cursor-pointer" title="Increase">+</button>
                     </form>
                 </div>
                 {% else %}
@@ -77,7 +77,7 @@
                     {% csrf_token %}
                     <input type="hidden" name="product_id" value="{{ product.id }}">
                     <input type="hidden" name="action" value="add">
-                    <button type="submit" class="border-2 border-blinkit-green text-blinkit-green bg-emerald-50/50 hover:bg-blinkit-green hover:text-white font-black px-4 py-1.5 rounded-xl text-xs uppercase tracking-wider transition-all duration-150 shadow-sm cursor-pointer">
+                    <button type="submit" class="border-2 border-blinkit-green text-blinkit-green bg-emerald-50/50 hover:bg-blinkit-green hover:text-white font-black px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs uppercase tracking-wider transition-all duration-150 shadow-sm cursor-pointer">
                         ADD
                     </button>
                 </form>
